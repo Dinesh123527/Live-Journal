@@ -1,0 +1,261 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Lock, Mail, User, Eye, EyeOff, Shield, CheckCircle2, XCircle } from 'lucide-react';
+import Cookies from 'js-cookie';
+import axios from '../../utils/axiosInstance';
+import Navbar from '../../components/Navbar/Navbar';
+import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
+import MarvelThemeSelector from '../../components/MarvelThemeSelector/MarvelThemeSelector';
+import './Signup.scss';
+
+const Signup = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [passwordMatchError, setPasswordMatchError] = useState('');
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+
+    // Clear general error when user starts typing
+    if (error) setError('');
+
+    // Real-time password match validation
+    if (name === 'confirmPassword') {
+      setConfirmPasswordTouched(true);
+      if (value && formData.password !== value) {
+        setPasswordMatchError('Passwords do not match');
+      } else {
+        setPasswordMatchError('');
+      }
+    }
+
+    if (name === 'password') {
+      setPasswordTouched(true);
+      if (formData.confirmPassword && value !== formData.confirmPassword) {
+        setPasswordMatchError('Passwords do not match');
+      } else {
+        setPasswordMatchError('');
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setPasswordMatchError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    // Validate password length
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Send only required fields to backend (not confirmPassword)
+      const { confirmPassword, ...signupData } = formData;
+      const response = await axios.post('/auth/signup', signupData);
+
+      if (response.data.token) {
+        // Store access token in cookies (expires in 1 hour)
+        Cookies.set('accessToken', response.data.token, { expires: 1/24 });
+
+        // Store user data in localStorage for quick access
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+
+        // Navigate to welcome page
+        navigate('/welcome');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || err.response?.data?.error || 'Signup failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Check if passwords match and both fields are filled
+  const passwordsMatch = formData.password && formData.confirmPassword && formData.password === formData.confirmPassword;
+  const showPasswordMatch = confirmPasswordTouched && formData.confirmPassword;
+
+  return (
+    <>
+      <Navbar showAuthButtons={false} />
+      <div className="signup-page">
+        {/* Theme Toggle and Marvel Theme Selector positioned at top-right */}
+        <div className="theme-toggle-container">
+          <ThemeToggle />
+          <MarvelThemeSelector />
+        </div>
+
+        <div className="signup-container">
+          <div className="signup-card">
+            <div className="signup-header">
+              <h1>Create Account</h1>
+              <p>Start your journaling journey today</p>
+            </div>
+
+            {error && (
+              <div className="error-message">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="signup-form">
+              <div className="form-group">
+                <label htmlFor="username">Username</label>
+                <div className="input-wrapper">
+                  <User className="input-icon" />
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    placeholder="Choose a username"
+                    required
+                    autoComplete="username"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <div className="input-wrapper">
+                  <Mail className="input-icon" />
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <div className="input-wrapper">
+                  <Lock className="input-icon" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Create a password"
+                    required
+                    autoComplete="new-password"
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+                {passwordTouched && formData.password && (
+                  <div className="password-strength">
+                    <span className={`strength-indicator ${formData.password.length >= 6 ? 'strong' : 'weak'}`}>
+                      {formData.password.length >= 6 ? '✓' : '✗'} Minimum 6 characters
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm Password</label>
+                <div className={`input-wrapper ${showPasswordMatch ? (passwordsMatch ? 'match' : 'no-match') : ''}`}>
+                  <Lock className="input-icon" />
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm your password"
+                    required
+                    autoComplete="new-password"
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                  {showPasswordMatch && (
+                    <div className="match-indicator">
+                      {passwordsMatch ? (
+                        <CheckCircle2 size={20} className="match-icon" />
+                      ) : (
+                        <XCircle size={20} className="no-match-icon" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                {passwordMatchError && confirmPasswordTouched && (
+                  <div className="field-error">
+                    {passwordMatchError}
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="signup-button"
+                disabled={loading || !!passwordMatchError || !formData.password || !formData.confirmPassword}
+              >
+                {loading ? 'Creating account...' : 'Create Account'}
+              </button>
+            </form>
+
+            <div className="signup-footer">
+              <p className="login-link">
+                Already have an account? <Link to="/login">Sign in</Link>
+              </p>
+
+              <div className="privacy-notice">
+                <Shield size={16} />
+                <p>Your data is encrypted and private. We never share your information.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Signup;

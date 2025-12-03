@@ -1,0 +1,337 @@
+/* Global Base Styles */
+:root {
+  --color-primary: #667eea;
+  --color-secondary: #764ba2;
+  --color-accent: #a855f7;
+
+  /* Light mode page backgrounds */
+  --page-bg-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  --welcome-bg-gradient: linear-gradient(135deg, #dbeafe 0%, #e9d5ff 50%, #fce7f3 100%);
+  --landing-bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #ffffff 50%, #fdf4ff 100%);
+  --dashboard-bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #fce7f3 100%);
+
+  /* Light mode colors */
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #999;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: rgba(0, 0, 0, 0.2);
+  --card-border: rgba(255, 255, 255, 0.5);
+  --card-border-accent: rgba(102, 126, 234, 0.2);
+  --input-bg: white;
+  --input-border: #e0e0e0;
+  --input-border-hover: #c0c0c0;
+  --icon-color: #999;
+  --placeholder-color: #aaa;
+  --notice-bg: rgba(102, 126, 234, 0.05);
+  --notice-border: rgba(102, 126, 234, 0.1);
+  --grid-color: rgba(0, 0, 0, 0.03);
+  --secondary-btn-bg: white;
+  --security-note-bg: rgba(102, 126, 234, 0.05);
+  --security-note-border: rgba(102, 126, 234, 0.1);
+  --marvel-glow: rgba(102, 126, 234, 0.3);
+  --marvel-primary: #667eea;
+  --marvel-secondary: #764ba2;
+  --marvel-accent: #a855f7;
+}
+
+/* Dark mode variables */
+html.dark {
+  background-color: #111827;
+  color: #f9fafb;
+
+  /* Dark mode page backgrounds */
+  --page-bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  --welcome-bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+  --landing-bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+  --dashboard-bg-gradient: linear-gradient(135deg, #111827 0%, #1e1b4b 50%, #312e81 100%);
+
+  /* Dark mode colors */
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --card-bg: rgba(17, 24, 39, 0.95);
+  --card-shadow: rgba(0, 0, 0, 0.6);
+  --card-shadow-hover: rgba(0, 0, 0, 0.8);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-border-accent: rgba(102, 126, 234, 0.3);
+  --input-bg: #1f2937;
+  --input-border: #374151;
+  --input-border-hover: #4b5563;
+  --icon-color: #9ca3af;
+  --placeholder-color: #6b7280;
+  --notice-bg: rgba(129, 140, 248, 0.1);
+  --notice-border: rgba(129, 140, 248, 0.2);
+  --grid-color: rgba(255, 255, 255, 0.05);
+  --secondary-btn-bg: rgba(31, 41, 55, 0.9);
+  --security-note-bg: rgba(102, 126, 234, 0.1);
+  --security-note-border: rgba(102, 126, 234, 0.2);
+  --marvel-glow: rgba(167, 139, 250, 0.3);
+  --marvel-primary: #818cf8;
+  --marvel-secondary: #a78bfa;
+  --marvel-accent: #c084fc;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  cursor: inherit;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: #111827;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  overflow-x: hidden;
+  cursor: default;
+}
+
+html.dark {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+html.dark body {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+body.focus-mode {
+  position: relative;
+}
+
+body.focus-mode::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+  background-size: 200% 100%;
+  animation: focus-gradient 3s ease infinite;
+  z-index: 10000;
+  opacity: 0.6;
+}
+
+body.focus-mode .background-decoration,
+body.focus-mode .floating-circle {
+  opacity: 0.3 !important;
+  animation: none !important;
+}
+
+body.focus-mode * {
+  animation-duration: 0.5s !important;
+  animation-iteration-count: 1 !important;
+}
+
+body.focus-mode .logo-background-glow,
+body.focus-mode .avatar-ring,
+body.focus-mode .settings-glow,
+body.focus-mode .theme-glow {
+  opacity: 0.2 !important;
+  animation: none !important;
+}
+
+body.focus-mode .welcome-content,
+body.focus-mode .dashboard-content {
+  max-width: 900px !important;
+  margin: 0 auto;
+}
+
+body.focus-mode .feature-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+body.focus-mode .feature-card:hover {
+  transform: translateY(-2px) !important;
+}
+
+body.focus-mode .sparkle-icon {
+  opacity: 0 !important;
+}
+
+body.focus-mode .cta-primary,
+body.focus-mode .cta-secondary {
+  box-shadow: none !important;
+}
+
+body.focus-mode .cta-primary:hover,
+body.focus-mode .cta-secondary:hover {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2) !important;
+}
+
+body.focus-mode .pull-to-refresh-indicator {
+  opacity: 0.6;
+}
+
+body.focus-mode .profile-avatar,
+body.focus-mode .settings-trigger {
+  transition: all 0.2s ease !important;
+}
+
+@keyframes focus-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Loading Spinner Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+::selection {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+html.dark ::selection {
+  background-color: #1e3a8a;
+  color: #dbeafe;
+}
+
+/* Theme-specific cursors */
+body[data-marvel-theme="default"],
+body[data-marvel-theme="default"] *,
+body[data-marvel-theme="default"] a,
+body[data-marvel-theme="default"] button,
+body[data-marvel-theme="default"] input,
+body[data-marvel-theme="default"] textarea,
+body[data-marvel-theme="default"] select {
+  cursor: default !important;
+}
+
+body[data-marvel-theme="default"] a,
+body[data-marvel-theme="default"] button,
+body[data-marvel-theme="default"] input[type="submit"],
+body[data-marvel-theme="default"] input[type="button"],
+body[data-marvel-theme="default"] select,
+body[data-marvel-theme="default"] [role="button"] {
+  cursor: pointer !important;
+}
+
+body[data-marvel-theme="default"] input[type="text"],
+body[data-marvel-theme="default"] input[type="email"],
+body[data-marvel-theme="default"] input[type="password"],
+body[data-marvel-theme="default"] textarea {
+  cursor: text !important;
+}
+
+/* Iron Man - Arc Reactor Design */
+body[data-marvel-theme="iron-man"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><radialGradient id="arcGlow"><stop offset="0%25" stop-color="%23fbbf24" stop-opacity="0.9"/><stop offset="100%25" stop-color="%23dc2626" stop-opacity="0.3"/></radialGradient></defs><circle cx="16" cy="16" r="14" fill="url(%23arcGlow)"/><circle cx="16" cy="16" r="10" fill="%23dc2626" opacity="0.8"/><circle cx="16" cy="16" r="6" fill="%23f59e0b"/><circle cx="16" cy="16" r="3" fill="%23fef3c7"/><path d="M16 8 L16 24 M8 16 L24 16" stroke="%23fbbf24" stroke-width="1.5" opacity="0.6"/></svg>') 16 16, auto !important;
+}
+
+body[data-marvel-theme="iron-man"] *,
+body[data-marvel-theme="iron-man"] a,
+body[data-marvel-theme="iron-man"] button,
+body[data-marvel-theme="iron-man"] input,
+body[data-marvel-theme="iron-man"] textarea,
+body[data-marvel-theme="iron-man"] select {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><radialGradient id="arcGlow"><stop offset="0%25" stop-color="%23fbbf24" stop-opacity="0.9"/><stop offset="100%25" stop-color="%23dc2626" stop-opacity="0.3"/></radialGradient></defs><circle cx="16" cy="16" r="14" fill="url(%23arcGlow)"/><circle cx="16" cy="16" r="10" fill="%23dc2626" opacity="0.8"/><circle cx="16" cy="16" r="6" fill="%23f59e0b"/><circle cx="16" cy="16" r="3" fill="%23fef3c7"/><path d="M16 8 L16 24 M8 16 L24 16" stroke="%23fbbf24" stroke-width="1.5" opacity="0.6"/></svg>') 16 16, auto !important;
+}
+
+/* Captain America - Shield Design */
+body[data-marvel-theme="captain-america"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="%232563eb" opacity="0.3"/><circle cx="16" cy="16" r="13" fill="%232563eb" stroke="%23ffffff" stroke-width="2"/><circle cx="16" cy="16" r="10" fill="%23dc2626"/><circle cx="16" cy="16" r="7" fill="%23ffffff"/><circle cx="16" cy="16" r="4" fill="%232563eb"/><path d="M16 12 L16.8 14.4 L19.4 14.4 L17.3 15.9 L18.1 18.3 L16 16.8 L13.9 18.3 L14.7 15.9 L12.6 14.4 L15.2 14.4 Z" fill="%23ffffff"/></svg>') 16 16, auto !important;
+}
+
+body[data-marvel-theme="captain-america"] *,
+body[data-marvel-theme="captain-america"] a,
+body[data-marvel-theme="captain-america"] button,
+body[data-marvel-theme="captain-america"] input,
+body[data-marvel-theme="captain-america"] textarea,
+body[data-marvel-theme="captain-america"] select {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="%232563eb" opacity="0.3"/><circle cx="16" cy="16" r="13" fill="%232563eb" stroke="%23ffffff" stroke-width="2"/><circle cx="16" cy="16" r="10" fill="%23dc2626"/><circle cx="16" cy="16" r="7" fill="%23ffffff"/><circle cx="16" cy="16" r="4" fill="%232563eb"/><path d="M16 12 L16.8 14.4 L19.4 14.4 L17.3 15.9 L18.1 18.3 L16 16.8 L13.9 18.3 L14.7 15.9 L12.6 14.4 L15.2 14.4 Z" fill="%23ffffff"/></svg>') 16 16, auto !important;
+}
+
+/* Black Panther - Vibranium Glow */
+body[data-marvel-theme="black-panther"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><radialGradient id="vibranium"><stop offset="0%25" stop-color="%23c4b5fd" stop-opacity="0.9"/><stop offset="100%25" stop-color="%237c3aed" stop-opacity="0.2"/></radialGradient></defs><circle cx="16" cy="16" r="15" fill="url(%23vibranium)"/><path d="M16 6 L20 12 L26 12 L22 18 L24 26 L16 22 L8 26 L10 18 L6 12 L12 12 Z" fill="%237c3aed" opacity="0.6"/><circle cx="16" cy="16" r="8" fill="%23a78bfa" opacity="0.8"/><circle cx="16" cy="16" r="4" fill="%23c4b5fd"/><path d="M13 14 L16 16 L19 14 M13 18 L16 16 L19 18" stroke="%231f2937" stroke-width="1.5" fill="none"/></svg>') 16 16, auto !important;
+}
+
+body[data-marvel-theme="black-panther"] *,
+body[data-marvel-theme="black-panther"] a,
+body[data-marvel-theme="black-panther"] button,
+body[data-marvel-theme="black-panther"] input,
+body[data-marvel-theme="black-panther"] textarea,
+body[data-marvel-theme="black-panther"] select {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><radialGradient id="vibranium"><stop offset="0%25" stop-color="%23c4b5fd" stop-opacity="0.9"/><stop offset="100%25" stop-color="%237c3aed" stop-opacity="0.2"/></radialGradient></defs><circle cx="16" cy="16" r="15" fill="url(%23vibranium)"/><path d="M16 6 L20 12 L26 12 L22 18 L24 26 L16 22 L8 26 L10 18 L6 12 L12 12 Z" fill="%237c3aed" opacity="0.6"/><circle cx="16" cy="16" r="8" fill="%23a78bfa" opacity="0.8"/><circle cx="16" cy="16" r="4" fill="%23c4b5fd"/><path d="M13 14 L16 16 L19 14 M13 18 L16 16 L19 18" stroke="%231f2937" stroke-width="1.5" fill="none"/></svg>') 16 16, auto !important;
+}
+
+/* Hulk - Gamma Radiation */
+body[data-marvel-theme="hulk"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><radialGradient id="gamma"><stop offset="0%25" stop-color="%2386efac" stop-opacity="0.9"/><stop offset="100%25" stop-color="%2316a34a" stop-opacity="0.3"/></radialGradient></defs><circle cx="16" cy="16" r="15" fill="url(%23gamma)"/><circle cx="16" cy="16" r="12" fill="%2316a34a" opacity="0.7"/><path d="M16 6 L18 14 L26 14 L20 20 L22 28 L16 24 L10 28 L12 20 L6 14 L14 14 Z" fill="%2386efac" opacity="0.6"/><circle cx="16" cy="16" r="5" fill="%2322c55e"/><path d="M11 11 L21 21 M11 21 L21 11" stroke="%237c3aed" stroke-width="2" opacity="0.5"/></svg>') 16 16, auto !important;
+}
+
+body[data-marvel-theme="hulk"] *,
+body[data-marvel-theme="hulk"] a,
+body[data-marvel-theme="hulk"] button,
+body[data-marvel-theme="hulk"] input,
+body[data-marvel-theme="hulk"] textarea,
+body[data-marvel-theme="hulk"] select {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><radialGradient id="gamma"><stop offset="0%25" stop-color="%2386efac" stop-opacity="0.9"/><stop offset="100%25" stop-color="%2316a34a" stop-opacity="0.3"/></radialGradient></defs><circle cx="16" cy="16" r="15" fill="url(%23gamma)"/><circle cx="16" cy="16" r="12" fill="%2316a34a" opacity="0.7"/><path d="M16 6 L18 14 L26 14 L20 20 L22 28 L16 24 L10 28 L12 20 L6 14 L14 14 Z" fill="%2386efac" opacity="0.6"/><circle cx="16" cy="16" r="5" fill="%2322c55e"/><path d="M11 11 L21 21 M11 21 L21 11" stroke="%237c3aed" stroke-width="2" opacity="0.5"/></svg>') 16 16, auto !important;
+}
+
+/* Spider-Man - Web Pattern */
+body[data-marvel-theme="spider-man"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><radialGradient id="webGlow"><stop offset="0%25" stop-color="%23f87171" stop-opacity="0.8"/><stop offset="100%25" stop-color="%23dc2626" stop-opacity="0.3"/></radialGradient></defs><circle cx="16" cy="16" r="15" fill="url(%23webGlow)"/><circle cx="16" cy="16" r="12" fill="%23dc2626" opacity="0.7"/><path d="M16 4 L16 28 M4 16 L28 16 M7 7 L25 25 M7 25 L25 7" stroke="%232563eb" stroke-width="1.5" opacity="0.7"/><circle cx="16" cy="16" r="8" fill="none" stroke="%232563eb" stroke-width="1.5" opacity="0.6"/><circle cx="16" cy="16" r="4" fill="none" stroke="%232563eb" stroke-width="1.5" opacity="0.6"/><circle cx="16" cy="16" r="3" fill="%23ef4444"/></svg>') 16 16, auto !important;
+}
+
+body[data-marvel-theme="spider-man"] *,
+body[data-marvel-theme="spider-man"] a,
+body[data-marvel-theme="spider-man"] button,
+body[data-marvel-theme="spider-man"] input,
+body[data-marvel-theme="spider-man"] textarea,
+body[data-marvel-theme="spider-man"] select {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><radialGradient id="webGlow"><stop offset="0%25" stop-color="%23f87171" stop-opacity="0.8"/><stop offset="100%25" stop-color="%23dc2626" stop-opacity="0.3"/></radialGradient></defs><circle cx="16" cy="16" r="15" fill="url(%23webGlow)"/><circle cx="16" cy="16" r="12" fill="%23dc2626" opacity="0.7"/><path d="M16 4 L16 28 M4 16 L28 16 M7 7 L25 25 M7 25 L25 7" stroke="%232563eb" stroke-width="1.5" opacity="0.7"/><circle cx="16" cy="16" r="8" fill="none" stroke="%232563eb" stroke-width="1.5" opacity="0.6"/><circle cx="16" cy="16" r="4" fill="none" stroke="%232563eb" stroke-width="1.5" opacity="0.6"/><circle cx="16" cy="16" r="3" fill="%23ef4444"/></svg>') 16 16, auto !important;
+}
+
+/* Thor - Mjolnir/Lightning */
+body[data-marvel-theme="thor"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><radialGradient id="lightning"><stop offset="0%25" stop-color="%2338bdf8" stop-opacity="0.9"/><stop offset="100%25" stop-color="%230ea5e9" stop-opacity="0.3"/></radialGradient></defs><circle cx="16" cy="16" r="15" fill="url(%23lightning)"/><circle cx="16" cy="16" r="12" fill="%230ea5e9" opacity="0.6"/><path d="M16 6 L18 14 L22 14 L14 22 L16 16 L12 16 Z" fill="%2338bdf8" stroke="%23ffffff" stroke-width="1"/><rect x="13" y="14" width="6" height="2" fill="%2364748b" rx="1"/><rect x="14" y="16" width="4" height="6" fill="%2364748b" rx="1"/><circle cx="16" cy="16" r="3" fill="%23bae6fd" opacity="0.7"/></svg>') 16 16, auto !important;
+}
+
+body[data-marvel-theme="thor"] *,
+body[data-marvel-theme="thor"] a,
+body[data-marvel-theme="thor"] button,
+body[data-marvel-theme="thor"] input,
+body[data-marvel-theme="thor"] textarea,
+body[data-marvel-theme="thor"] select {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><radialGradient id="lightning"><stop offset="0%25" stop-color="%2338bdf8" stop-opacity="0.9"/><stop offset="100%25" stop-color="%230ea5e9" stop-opacity="0.3"/></radialGradient></defs><circle cx="16" cy="16" r="15" fill="url(%23lightning)"/><circle cx="16" cy="16" r="12" fill="%230ea5e9" opacity="0.6"/><path d="M16 6 L18 14 L22 14 L14 22 L16 16 L12 16 Z" fill="%2338bdf8" stroke="%23ffffff" stroke-width="1"/><rect x="13" y="14" width="6" height="2" fill="%2364748b" rx="1"/><rect x="14" y="16" width="4" height="6" fill="%2364748b" rx="1"/><circle cx="16" cy="16" r="3" fill="%23bae6fd" opacity="0.7"/></svg>') 16 16, auto !important;
+}

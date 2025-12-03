@@ -1,0 +1,314 @@
+.theme-toggle-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .theme-toggle-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: rgba(102, 126, 234, 0.1);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.2);
+      transform: scale(1.05);
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transform: scale(1.05);
+
+      .theme-icon {
+        color: white;
+      }
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .theme-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: #667eea;
+      transition: all 0.3s ease;
+    }
+
+    .theme-glow {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      opacity: 0;
+      filter: blur(8px);
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover .theme-glow,
+    &.active .theme-glow {
+      opacity: 0.4;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+  }
+
+  .theme-panel {
+    position: absolute;
+    top: calc(100% + 1.25rem);
+    right: 0;
+    width: 200px;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    z-index: 9999;
+    animation: slideDown 0.3s ease-out;
+    margin-top: 0.75rem;
+
+    .theme-panel-header {
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+      h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+      }
+    }
+
+    .theme-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .theme-option {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        background: white;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+
+        svg {
+          width: 1.125rem;
+          height: 1.125rem;
+          flex-shrink: 0;
+          transition: all 0.3s ease;
+        }
+
+        span {
+          position: relative;
+          z-index: 1;
+          background: linear-gradient(135deg, #6b7280, #4b5563);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          transition: all 0.3s ease;
+        }
+
+        &::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        &:hover {
+          border-color: #667eea;
+          background: white;
+          transform: translateX(2px);
+
+          &::before {
+            opacity: 1;
+          }
+
+          svg {
+            color: #667eea;
+            transform: scale(1.1);
+          }
+
+          span {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+        }
+
+        &.active {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-color: #667eea;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+          svg {
+            color: white;
+          }
+
+          span {
+            background: white;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dark Mode Styles
+html.dark {
+  .theme-toggle-wrapper {
+    .theme-toggle-button {
+      background: rgba(167, 139, 250, 0.15);
+
+      &:hover {
+        background: rgba(167, 139, 250, 0.25);
+      }
+
+      &.active {
+        background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+      }
+
+      .theme-icon {
+        color: #a78bfa;
+      }
+
+      &.active .theme-icon {
+        color: white;
+      }
+
+      .theme-glow {
+        background: linear-gradient(135deg, #a78bfa, #ec4899);
+      }
+    }
+
+    .theme-panel {
+      background: #1f2937;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                  0 0 0 1px rgba(75, 85, 99, 0.3);
+
+      .theme-panel-header {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+
+        h4 {
+          background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+      }
+
+      .theme-options {
+        .theme-option {
+          background: #111827;
+          border-color: #374151;
+
+          svg {
+            color: #9ca3af;
+          }
+
+          span {
+            background: linear-gradient(135deg, #9ca3af, #6b7280);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+
+          &::before {
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(236, 72, 153, 0.1));
+          }
+
+          &:hover {
+            background: #111827;
+            border-color: #a78bfa;
+
+            &::before {
+              opacity: 1;
+            }
+
+            svg {
+              color: #a78bfa;
+              transform: scale(1.1);
+            }
+
+            span {
+              background: linear-gradient(135deg, #a78bfa, #ec4899);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+            }
+          }
+
+          &.active {
+            background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+            border-color: #a78bfa;
+            box-shadow: 0 4px 12px rgba(167, 139, 250, 0.4);
+
+            svg {
+              color: white;
+            }
+
+            span {
+              background: white;
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .theme-toggle-wrapper {
+    .theme-panel {
+      width: 180px;
+      right: -1rem;
+    }
+  }
+}

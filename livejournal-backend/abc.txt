@@ -1,0 +1,19 @@
+const authRoutes = safeRequire('./routes/auth');
+const entriesRoutes = safeRequire('./routes/entries');
+const analysisRoutes = safeRequire('./routes/analysis');
+
+if (authRoutes) app.use('/api/auth', authRoutes);
+if (entriesRoutes) app.use('/api/entries', entriesRoutes);
+if (analysisRoutes) app.use('/api/analysis', analysisRoutes);
+
+Optional improvements you can add later
+
+Input validation (Joi or express-validator)
+
+Full-text search (MySQL FULLTEXT on body,title)
+
+Pagination metadata (total count)
+
+Soft delete vs hard delete (add deleted_at)
+
+Rate limiting or per-user quotas

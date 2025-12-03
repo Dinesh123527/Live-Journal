@@ -1,0 +1,576 @@
+.landing-page {
+  min-height: 100vh;
+  width: 100%;
+  background: var(--landing-bg-gradient);
+  transition: background 0.6s ease;
+
+  .hero-section {
+    padding: 8rem 1rem 5rem;
+    text-align: center;
+
+    @media (min-width: 768px) {
+      padding: 10rem 2rem 6rem;
+    }
+
+    .hero-content {
+      max-width: 72rem;
+      margin: 0 auto;
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, var(--marvel-primary, #667eea) 0%, var(--marvel-secondary, #764ba2) 50%, var(--marvel-accent, #a855f7) 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1.2;
+        animation: shimmer 3s ease-in-out infinite;
+
+        @media (min-width: 768px) {
+          font-size: 4.5rem;
+        }
+      }
+
+      p {
+        font-size: 1.125rem;
+        color: var(--text-secondary, #6b7280);
+        margin-bottom: 2rem;
+        max-width: 48rem;
+        margin-left: auto;
+        margin-right: auto;
+        transition: color 0.3s ease;
+
+        @media (min-width: 768px) {
+          font-size: 1.5rem;
+        }
+      }
+
+      .cta-button {
+        position: relative;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, var(--marvel-primary, #667eea) 0%, var(--marvel-secondary, #764ba2) 50%, var(--marvel-accent, #a855f7) 100%);
+        background-size: 200% 200%;
+        color: white;
+        border: none;
+        border-radius: 9999px;
+        font-size: 1.125rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow:
+          0 10px 25px -5px var(--marvel-glow, rgba(102, 126, 234, 0.4)),
+          0 8px 10px -6px color-mix(in srgb, var(--marvel-secondary, #764ba2) 30%, transparent);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        animation: gradient-shift 3s ease infinite;
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.3);
+          transform: translate(-50%, -50%);
+          transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        &:hover {
+          box-shadow:
+            0 20px 40px -5px var(--marvel-glow, rgba(102, 126, 234, 0.5)),
+            0 12px 20px -6px color-mix(in srgb, var(--marvel-secondary, #764ba2) 40%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          transform: translateY(-2px) scale(1.05);
+          animation: gradient-shift 1.5s ease infinite, button-glow 1.5s ease infinite;
+
+          &::before {
+            width: 300px;
+            height: 300px;
+          }
+        }
+
+        &:active {
+          transform: translateY(0) scale(1.02);
+        }
+
+        span {
+          position: relative;
+          z-index: 1;
+        }
+      }
+    }
+
+    .hero-preview {
+      margin-top: 4rem;
+      max-width: 64rem;
+      margin-left: auto;
+      margin-right: auto;
+
+      .preview-card {
+        background: var(--preview-bg, linear-gradient(135deg,
+          white 0%,
+          color-mix(in srgb, var(--marvel-primary, #667eea) 5%, white) 100%));
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px var(--marvel-glow, rgba(102, 126, 234, 0.25));
+        padding: 2rem;
+        border: 1px solid var(--preview-border, color-mix(in srgb, var(--marvel-primary, #667eea) 20%, transparent));
+        transition: all 0.4s ease;
+
+        .window-controls {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 1rem;
+
+          span {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 9999px;
+
+            &:nth-child(1) { background-color: #ef4444; }
+            &:nth-child(2) { background-color: #eab308; }
+            &:nth-child(3) { background-color: #22c55e; }
+          }
+        }
+
+        .preview-content {
+          text-align: left;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+
+          .line {
+            height: 1rem;
+            border-radius: 0.25rem;
+            background: linear-gradient(to right,
+              color-mix(in srgb, var(--marvel-primary, #667eea) 30%, white),
+              color-mix(in srgb, var(--marvel-accent, #a855f7) 25%, white));
+            transition: background 0.3s ease;
+
+            &:nth-child(1) { width: 75%; }
+            &:nth-child(2) { width: 100%; }
+            &:nth-child(3) { width: 85%; }
+          }
+
+          .ai-suggestion {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            color: var(--text-secondary, #6b7280);
+            font-size: 0.875rem;
+            transition: color 0.3s ease;
+
+            svg {
+              width: 1.25rem;
+              height: 1.25rem;
+              color: var(--marvel-secondary, #764ba2);
+              transition: color 0.3s ease;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .features-section {
+    padding: 5rem 1rem;
+    background: var(--section-bg, linear-gradient(135deg,
+      white 0%,
+      color-mix(in srgb, var(--marvel-primary, #667eea) 3%, white) 100%));
+    width: 100%;
+    transition: background 0.6s ease;
+
+    @media (min-width: 768px) {
+      padding: 6rem 2rem;
+    }
+
+    .features-header {
+      text-align: center;
+      margin-bottom: 4rem;
+
+      h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary, #111827);
+        margin-bottom: 1rem;
+        transition: color 0.3s ease;
+
+        @media (min-width: 768px) {
+          font-size: 3rem;
+        }
+      }
+
+      p {
+        font-size: 1.125rem;
+        color: var(--text-secondary, #6b7280);
+        transition: color 0.3s ease;
+      }
+    }
+
+    .features-grid {
+      display: grid;
+      gap: 2rem;
+      max-width: 72rem;
+      margin: 0 auto;
+
+      @media (min-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @media (min-width: 1024px) {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .feature-card {
+        padding: 2rem;
+        background: var(--card-bg, linear-gradient(135deg,
+          white,
+          color-mix(in srgb, var(--marvel-primary, #667eea) 5%, white)));
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px var(--card-shadow, rgba(102, 126, 234, 0.1));
+        border: 2px solid var(--card-border, color-mix(in srgb, var(--marvel-primary, #667eea) 15%, transparent));
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-0.5rem);
+          box-shadow: 0 20px 25px -5px var(--marvel-glow, rgba(102, 126, 234, 0.2));
+          border-color: var(--marvel-primary, #667eea);
+          background: var(--card-bg-hover, linear-gradient(135deg,
+            color-mix(in srgb, var(--marvel-primary, #667eea) 5%, white),
+            color-mix(in srgb, var(--marvel-accent, #a855f7) 8%, white)));
+        }
+
+        .feature-icon {
+          width: 3rem;
+          height: 3rem;
+          background: linear-gradient(135deg, var(--marvel-primary, #667eea) 0%, var(--marvel-secondary, #764ba2) 100%);
+          border-radius: 0.75rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 1rem;
+          box-shadow: 0 4px 12px var(--marvel-glow, rgba(102, 126, 234, 0.3));
+          transition: all 0.3s ease;
+
+          svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: white;
+          }
+        }
+
+        &:hover .feature-icon {
+          transform: scale(1.1) rotate(5deg);
+        }
+
+        h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: var(--text-primary, #111827);
+          margin-bottom: 0.5rem;
+          transition: color 0.3s ease;
+        }
+
+        p {
+          color: var(--text-secondary, #6b7280);
+          transition: color 0.3s ease;
+        }
+      }
+    }
+  }
+
+  .cta-section {
+    padding: 5rem 1rem;
+    width: 100%;
+    background: var(--cta-bg, linear-gradient(135deg,
+      color-mix(in srgb, var(--marvel-primary, #667eea) 20%, white) 0%,
+      color-mix(in srgb, var(--marvel-secondary, #764ba2) 15%, white) 50%,
+      color-mix(in srgb, var(--marvel-accent, #a855f7) 20%, white) 100%));
+    transition: background 0.6s ease;
+
+    @media (min-width: 768px) {
+      padding: 6rem 2rem;
+    }
+
+    .cta-card {
+      max-width: 64rem;
+      margin: 0 auto;
+      background: linear-gradient(135deg, var(--marvel-primary, #667eea) 0%, var(--marvel-secondary, #764ba2) 50%, var(--marvel-accent, #a855f7) 100%);
+      border-radius: 1.5rem;
+      padding: 3rem;
+      text-align: center;
+      color: white;
+      box-shadow: 0 25px 50px -12px var(--marvel-glow, rgba(102, 126, 234, 0.5));
+      transition: all 0.4s ease;
+
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 60px -15px var(--marvel-glow, rgba(102, 126, 234, 0.6));
+      }
+
+      h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+
+        @media (min-width: 768px) {
+          font-size: 3rem;
+        }
+      }
+
+      p {
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+
+        @media (min-width: 768px) {
+          font-size: 1.25rem;
+        }
+      }
+
+      button {
+        padding: 1rem 2.5rem;
+        background: white;
+        color: var(--marvel-primary, #667eea);
+        border: none;
+        border-radius: 9999px;
+        font-size: 1.125rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+          background: rgba(255, 255, 255, 0.95);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+
+  footer {
+    padding: 3rem 1rem;
+    text-align: center;
+    background: var(--footer-bg, color-mix(in srgb, var(--marvel-primary, #667eea) 5%, white));
+    border-top: 1px solid var(--footer-border, color-mix(in srgb, var(--marvel-primary, #667eea) 10%, transparent));
+    transition: all 0.6s ease;
+
+    p {
+      color: var(--text-secondary, #6b7280);
+      margin-bottom: 1rem;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+
+      a {
+        color: var(--marvel-primary, #667eea);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 0;
+          height: 2px;
+          background: var(--marvel-primary, #667eea);
+          transition: width 0.3s ease;
+        }
+
+        &:hover {
+          color: var(--marvel-secondary, #764ba2);
+
+          &::after {
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dark Mode Styles
+html.dark .landing-page {
+  // Override all color variables for dark mode
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --marvel-glow: rgba(167, 139, 250, 0.3);
+
+  .hero-section {
+    .hero-content {
+      h1 {
+        // Gradient text works automatically with CSS variables
+        background: linear-gradient(135deg, var(--marvel-primary) 0%, var(--marvel-secondary) 50%, var(--marvel-accent) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+      }
+
+      p {
+        color: var(--text-secondary);
+      }
+
+      .cta-button {
+        background: linear-gradient(135deg, var(--marvel-primary) 0%, var(--marvel-secondary) 50%, var(--marvel-accent) 100%);
+        box-shadow: 0 10px 25px -5px rgba(129, 140, 248, 0.4),
+                    0 8px 10px -6px rgba(167, 139, 250, 0.3);
+
+        &:hover {
+          box-shadow: 0 20px 40px -5px rgba(129, 140, 248, 0.5),
+                      0 12px 20px -6px rgba(167, 139, 250, 0.4);
+        }
+      }
+    }
+
+    .hero-preview {
+      .preview-card {
+        background: linear-gradient(135deg,
+          rgba(17, 24, 39, 0.95) 0%,
+          rgba(31, 41, 55, 0.9) 100%);
+        border-color: rgba(129, 140, 248, 0.3);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+        .preview-content {
+          .line {
+            background: linear-gradient(to right,
+              rgba(129, 140, 248, 0.4),
+              rgba(192, 132, 252, 0.3));
+          }
+
+          .ai-suggestion {
+            color: var(--text-secondary);
+
+            svg {
+              color: var(--marvel-secondary);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .features-section {
+    background: linear-gradient(135deg,
+      rgba(15, 23, 42, 0.5) 0%,
+      rgba(30, 27, 75, 0.4) 100%);
+
+    .features-header {
+      h2 {
+        color: var(--text-primary);
+      }
+
+      p {
+        color: var(--text-secondary);
+      }
+    }
+
+    .features-grid {
+      .feature-card {
+        background: linear-gradient(135deg,
+          rgba(31, 41, 55, 0.9),
+          rgba(55, 65, 81, 0.8));
+        border-color: rgba(129, 140, 248, 0.2);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+
+        &:hover {
+          border-color: var(--marvel-primary);
+          box-shadow: 0 20px 25px -5px rgba(129, 140, 248, 0.3);
+          background: linear-gradient(135deg,
+            rgba(55, 65, 81, 0.9),
+            rgba(75, 85, 99, 0.8));
+        }
+
+        .feature-icon {
+          background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
+          box-shadow: 0 4px 12px rgba(129, 140, 248, 0.4);
+        }
+
+        h3 {
+          color: var(--text-primary);
+        }
+
+        p {
+          color: var(--text-secondary);
+        }
+      }
+    }
+  }
+
+  .cta-section {
+    background: linear-gradient(135deg,
+      rgba(30, 27, 75, 0.4) 0%,
+      rgba(49, 46, 129, 0.3) 50%,
+      rgba(88, 28, 135, 0.3) 100%);
+
+    .cta-card {
+      background: linear-gradient(135deg, var(--marvel-primary) 0%, var(--marvel-secondary) 50%, var(--marvel-accent) 100%);
+      box-shadow: 0 25px 50px -12px rgba(129, 140, 248, 0.6);
+
+      &:hover {
+        box-shadow: 0 30px 60px -15px rgba(129, 140, 248, 0.7);
+      }
+
+      button {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--marvel-primary);
+
+        &:hover {
+          background: white;
+          box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+      }
+    }
+  }
+
+  footer {
+    background: rgba(15, 23, 42, 0.9);
+    border-top-color: rgba(129, 140, 248, 0.2);
+
+    p {
+      color: var(--text-secondary);
+    }
+
+    .footer-links {
+      a {
+        color: var(--marvel-primary);
+
+        &:hover {
+          color: var(--marvel-secondary);
+        }
+
+        &::after {
+          background: var(--marvel-primary);
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes button-glow {
+  0%, 100% { box-shadow: 0 20px 40px -5px var(--marvel-glow, rgba(102, 126, 234, 0.5)); }
+  50% { box-shadow: 0 20px 40px -5px var(--marvel-glow, rgba(102, 126, 234, 0.7)); }
+}

@@ -1,0 +1,352 @@
+.confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-out;
+
+  &.disintegrating {
+    pointer-events: none;
+  }
+}
+
+.confirm-modal {
+  background: var(--card-bg, #ffffff);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 450px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+
+  &.disintegrating {
+    animation: disintegrate 1.5s ease-out forwards;
+    filter: blur(0px);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(139, 69, 19, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      animation: dustSwirl 1.5s ease-out;
+      pointer-events: none;
+      border-radius: 16px;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 200%;
+      height: 200%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(
+        circle,
+        rgba(255, 140, 0, 0.4) 0%,
+        transparent 70%
+      );
+      animation: dustExplosion 1.5s ease-out;
+      pointer-events: none;
+    }
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary, #666);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: var(--hover-bg, #f0f0f0);
+      color: var(--text-primary, #333);
+    }
+  }
+
+  .modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+
+    &.warning {
+      background: rgba(255, 193, 7, 0.1);
+      color: #ffc107;
+    }
+
+    &.danger {
+      background: rgba(244, 67, 54, 0.1);
+      color: #f44336;
+    }
+
+    &.info {
+      background: rgba(33, 150, 243, 0.1);
+      color: #2196f3;
+    }
+
+    &.success {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+    }
+  }
+
+  .modal-content {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary, #333);
+    }
+
+    p {
+      font-size: 1rem;
+      color: var(--text-secondary, #666);
+      line-height: 1.5;
+    }
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+
+    button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      min-width: 100px;
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+
+    .cancel-btn {
+      background: var(--secondary-bg, #e0e0e0);
+      color: var(--text-primary, #333);
+
+      &:hover:not(:disabled) {
+        background: var(--secondary-hover, #d0d0d0);
+      }
+    }
+
+    .confirm-btn {
+      &.primary {
+        background: var(--primary-color, #6366f1);
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: var(--primary-hover, #5558e3);
+        }
+      }
+
+      &.danger {
+        background: #f44336;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: #e53935;
+        }
+      }
+
+      &.success {
+        background: #4caf50;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: #43a047;
+        }
+      }
+    }
+  }
+}
+
+// Dark mode support
+[data-theme='dark'] {
+  .confirm-modal {
+    background: var(--card-bg, #1e1e1e);
+
+    .close-btn {
+      color: var(--text-secondary, #999);
+
+      &:hover {
+        background: var(--hover-bg, #333);
+        color: var(--text-primary, #fff);
+      }
+    }
+
+    .modal-content {
+      h2 {
+        color: var(--text-primary, #fff);
+      }
+
+      p {
+        color: var(--text-secondary, #aaa);
+      }
+    }
+
+    .modal-actions {
+      .cancel-btn {
+        background: var(--secondary-bg, #333);
+        color: var(--text-primary, #fff);
+
+        &:hover:not(:disabled) {
+          background: var(--secondary-hover, #444);
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Thanos Disintegration Effect
+@keyframes disintegrate {
+  0% {
+    opacity: 1;
+    filter: blur(0px) brightness(1);
+    transform: scale(1);
+  }
+  30% {
+    filter: blur(1px) brightness(1.2);
+  }
+  60% {
+    opacity: 0.7;
+    filter: blur(3px) brightness(0.8);
+    transform: scale(0.98);
+  }
+  85% {
+    opacity: 0.3;
+    filter: blur(8px) brightness(0.5);
+    transform: scale(0.95) translateY(10px);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(15px) brightness(0);
+    transform: scale(0.9) translateY(30px);
+  }
+}
+
+@keyframes dustSwirl {
+  0% {
+    opacity: 0;
+    transform: rotate(0deg) scale(1);
+  }
+  20% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+    transform: rotate(180deg) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(360deg) scale(2);
+  }
+}
+
+@keyframes dustExplosion {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  30% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  70% {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+// Particle effect for dust
+.dust-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10001;
+
+  &::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      circle,
+      rgba(139, 69, 19, 0.8),
+      rgba(210, 180, 140, 0.6),
+      transparent
+    );
+    border-radius: 50%;
+    animation: particleFade 1.5s ease-out forwards;
+  }
+}
+
+@keyframes particleFade {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(0);
+  }
+}
