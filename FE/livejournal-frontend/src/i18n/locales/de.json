@@ -1,0 +1,104 @@
+{
+  "navbar": {
+    "brand": "Live Journal",
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "logout": "Abmelden"
+  },
+  "landing": {
+    "hero": {
+      "title1": "Deine Gedanken,",
+      "title2": "Wunderschön Festgehalten",
+      "description": "Ein modernes Tagebuch-Erlebnis powered by KI. Verfolge deine Stimmung, organisiere deine Gedanken und entdecke Erkenntnisse über dich selbst.",
+      "cta": "Jetzt Starten"
+    },
+    "features": {
+      "heading": "Alles was Du Brauchst",
+      "subheading": "Leistungsstarke Funktionen für besseres Schreiben",
+      "aiPowered": {
+        "title": "KI-Gestützt",
+        "description": "Intelligente Einblicke und Stimmungsanalyse für deine Einträge"
+      },
+      "secure": {
+        "title": "Sicher & Privat",
+        "description": "Ende-zu-Ende-Verschlüsselung schützt deine Gedanken"
+      },
+      "mood": {
+        "title": "Stimmung Verfolgen",
+        "description": "Visualisiere emotionale Muster im Laufe der Zeit"
+      },
+      "design": {
+        "title": "Schönes Design",
+        "description": "Von Apple inspirierte Oberfläche mit Dunkelmodus"
+      },
+      "search": {
+        "title": "Leistungsstarke Suche",
+        "description": "Finde jeden Eintrag sofort mit intelligenter Suche"
+      },
+      "drafts": {
+        "title": "Auto-Speichern",
+        "description": "Verliere nie deine Gedanken mit automatischen Entwürfen"
+      }
+    },
+    "cta": {
+      "heading": "Bereit Deine Reise zu Beginnen?",
+      "description": "Schließe dich Tausenden an, die täglich mit uns schreiben",
+      "button": "Konto Erstellen"
+    },
+    "footer": {
+      "copyright": "© 2025 Live Journal. Deine Gedanken, deine Privatsphäre.",
+      "privacy": "Datenschutz",
+      "terms": "Nutzungsbedingungen",
+      "contact": "Kontakt"
+    }
+  },
+  "login": {
+    "title": "Willkommen Zurück",
+    "subtitle": "Melde dich an, um deine Reise fortzusetzen",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "rememberMe": "Angemeldet bleiben",
+    "forgotPassword": "Passwort vergessen?",
+    "submit": "Anmelden",
+    "noAccount": "Noch kein Konto?",
+    "signUp": "Registrieren"
+  },
+  "signup": {
+    "title": "Starte Deine Reise",
+    "subtitle": "Erstelle dein Konto und beginne zu schreiben",
+    "name": "Vollständiger Name",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort Bestätigen",
+    "submit": "Konto Erstellen",
+    "hasAccount": "Bereits ein Konto?",
+    "signIn": "Anmelden"
+  },
+  "terms": {
+    "title": "Nutzungsbedingungen",
+    "lastUpdated": "Zuletzt aktualisiert"
+  },
+  "privacy": {
+    "title": "Datenschutz",
+    "lastUpdated": "Zuletzt aktualisiert"
+  },
+  "contact": {
+    "title": "Kontaktiere Uns",
+    "subtitle": "Wir freuen uns von dir zu hören",
+    "name": "Dein Name",
+    "email": "Deine E-Mail",
+    "message": "Nachricht",
+    "submit": "Nachricht Senden"
+  },
+  "language": {
+    "select": "Sprache Wählen",
+    "en": "Englisch",
+    "es": "Spanisch",
+    "fr": "Französisch",
+    "de": "Deutsch",
+    "hi": "Hindi",
+    "zh": "Chinesisch",
+    "ja": "Japanisch",
+    "ar": "Arabisch"
+  }
+}

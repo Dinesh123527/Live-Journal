@@ -92,13 +92,23 @@ export const useVapiJournal = () => {
         vapiRef.current.on('error', (error) => {
           console.error('❌ Vapi error:', error);
 
-          // Provide more specific error messages
+Hi           // Ignore "Meeting ended" errors - these are normal when stopping recording
+          if (error.message?.includes('Meeting has ended') ||
+              error.message?.includes('ended due to ejection') ||
+              error.errorMsg?.includes('Meeting has ended')) {
+            console.log('📞 Recording session ended normally');
+            setIsRecording(false);
+            setIsConnected(false);
+            return; // Don't set error state for normal endings
+          }
+
+          // Provide more specific error messages for actual errors
           let errorMessage = 'Voice recording error';
 
-          if (error.message?.includes('ended') || error.message?.includes('ejection')) {
-            errorMessage = 'Voice assistant configuration issue. Please check your Vapi dashboard settings.';
-          } else if (error.message?.includes('microphone') || error.message?.includes('permission')) {
+          if (error.message?.includes('microphone') || error.message?.includes('permission')) {
             errorMessage = 'Microphone access denied. Please allow microphone permission.';
+          } else if (error.message?.includes('network') || error.message?.includes('connection')) {
+            errorMessage = 'Network connection issue. Please check your internet.';
           } else if (error.message) {
             errorMessage = error.message;
           }

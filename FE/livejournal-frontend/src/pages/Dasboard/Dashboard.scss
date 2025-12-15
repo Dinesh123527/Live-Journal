@@ -272,6 +272,54 @@
           transform: translateY(-3px);
         }
       }
+
+      // Time Capsule Button - Special emotional design
+      &.time-capsule-btn {
+        background: rgba(139, 92, 246, 0.05);
+        color: var(--text-secondary);
+        border: 2px dashed var(--card-border);
+        position: relative;
+
+        svg {
+          color: var(--marvel-primary);
+          opacity: 0.8;
+        }
+
+        // Slow glow animation on hover
+        &::after {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(99, 102, 241, 0.3));
+          opacity: 0;
+          z-index: -1;
+          transition: opacity 0.3s ease;
+          animation: glowPulse 2s ease-in-out infinite;
+          animation-play-state: paused;
+        }
+
+        &:hover {
+          color: var(--marvel-primary);
+          border-color: var(--marvel-primary);
+          border-style: dashed;
+          background: rgba(139, 92, 246, 0.1);
+          transform: translateY(-3px);
+
+          svg {
+            opacity: 1;
+          }
+
+          &::after {
+            opacity: 1;
+            animation-play-state: running;
+          }
+        }
+
+        &:active {
+          transform: scale(0.96);
+        }
+      }
     }
   }
 
@@ -384,27 +432,70 @@
     padding: 1.5rem;
     border: 1px solid var(--card-border);
     box-shadow: 0 4px 12px var(--card-shadow);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     animation: fadeInUp 0.6s ease-out 0.4s both;
+    position: relative;
+    overflow: hidden;
+
+    // Animated gradient overlay (same as calendar)
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(102, 126, 234, 0.1),
+          transparent);
+      transition: left 0.6s ease;
+    }
 
     &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px var(--card-shadow);
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+      border-color: var(--marvel-primary);
+
+      &::before {
+        left: 100%;
+      }
+
+      .card-header::after {
+        width: 100%;
+      }
     }
 
     .card-header {
       margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--card-border);
+      position: relative;
+      z-index: 1;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--marvel-primary), var(--marvel-secondary));
+        transition: width 0.4s ease;
+      }
 
       h3 {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
         font-size: 1.125rem;
-        font-weight: 600;
+        font-weight: 700;
         color: var(--text-primary);
+        letter-spacing: -0.01em;
 
         svg {
           color: var(--marvel-primary);
+          filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
         }
       }
     }
@@ -926,121 +1017,1285 @@
     }
   }
 
-  // PIN Setup Prompt styles
-  .pin-setup-prompt {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+  // Learning Moment Card
+  .learning-moment-card {
     background: var(--card-bg);
-    border: 2px solid var(--marvel-primary);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
-    max-width: 350px;
-    animation: slideUp 0.3s ease-out;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 4px 12px var(--card-shadow);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out 0.4s both;
 
-    p {
-      color: var(--text-primary);
-      font-size: 0.95rem;
-      margin-bottom: 1rem;
-      line-height: 1.5;
+    // Animated gradient overlay (same as calendar)
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(102, 126, 234, 0.1),
+          transparent);
+      transition: left 0.6s ease;
     }
 
-    .prompt-actions {
+    &:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+      border-color: var(--marvel-primary);
+
+      &::before {
+        left: 100%;
+      }
+
+      .card-action {
+        color: var(--marvel-secondary);
+      }
+    }
+
+    .card-header {
       display: flex;
-      gap: 0.75rem;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--card-border);
+      position: relative;
+      z-index: 1;
 
-      button {
-        flex: 1;
-        padding: 0.75rem 1rem;
-        border: none;
-        border-radius: 8px;
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--marvel-primary), var(--marvel-secondary));
+        transition: width 0.4s ease;
+      }
+
+      h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+
+        svg {
+          color: var(--marvel-primary);
+          filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+        }
+      }
+
+      .captured-badge {
+        padding: 0.35rem 0.75rem;
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border-radius: 20px;
+        font-size: 0.8rem;
         font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 0.9rem;
+      }
+    }
 
-        &.btn-setup {
-          background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
+    &:hover .card-header::after {
+      width: 100%;
+    }
+
+    .learning-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+
+      .learning-preview {
+        .learning-text {
+          font-size: 1rem;
+          color: var(--text-primary);
+          font-style: italic;
+          line-height: 1.6;
+          margin-bottom: 1rem;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .learning-meta {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+
+          .mood-indicator {
+            font-size: 1.25rem;
+          }
+
+          .streak-mini {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.75rem;
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--marvel-primary);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+
+            svg {
+              animation: flameFlicker 1.5s ease-in-out infinite;
+            }
+          }
+        }
+      }
+
+      .no-learning-data {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+        border-radius: 12px;
+        border: 2px dashed var(--card-border);
+
+        .prompt-icon {
+          font-size: 2.5rem;
+          margin-bottom: 0.75rem;
+          animation: float 3s ease-in-out infinite;
+        }
+
+        .prompt-text {
+          font-size: 1rem;
+          color: var(--text-primary);
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+
+        .hint {
+          font-size: 0.85rem;
+          color: var(--text-muted);
+          font-style: italic;
+        }
+      }
+    }
+
+    .card-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding-top: 1.25rem;
+      margin-top: 1.25rem;
+      border-top: 2px solid var(--card-border);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--marvel-primary);
+      transition: all 0.3s ease;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      position: relative;
+
+      svg {
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--marvel-primary), var(--marvel-secondary));
+        transition: width 0.3s ease;
+      }
+    }
+
+    &:hover .card-action {
+      svg {
+        transform: translateX(8px) scale(1.2);
+      }
+
+      &::before {
+        width: 60%;
+      }
+    }
+  }
+
+  // Life Chapters Card (matches Learning Moment Card)
+  .life-chapters-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 4px 12px var(--card-shadow);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out 0.5s both;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(139, 92, 246, 0.1),
+          transparent);
+      transition: left 0.6s ease;
+    }
+
+    &:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(139, 92, 246, 0.25);
+      border-color: var(--marvel-primary);
+
+      &::before {
+        left: 100%;
+      }
+
+      .card-action {
+        color: var(--marvel-secondary);
+      }
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--card-border);
+      position: relative;
+      z-index: 1;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--marvel-primary), var(--marvel-secondary));
+        transition: width 0.4s ease;
+      }
+
+      h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+
+        svg {
+          color: var(--marvel-primary);
+          filter: drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3));
+        }
+      }
+    }
+
+    &:hover .card-header::after {
+      width: 100%;
+    }
+
+    .chapters-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+
+      .no-chapters-data {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.03), rgba(168, 85, 247, 0.03));
+        border-radius: 12px;
+        border: 2px dashed var(--card-border);
+
+        .prompt-icon {
+          font-size: 2.5rem;
+          margin-bottom: 0.75rem;
+          animation: float 3s ease-in-out infinite;
+        }
+
+        .prompt-text {
+          font-size: 1rem;
+          color: var(--text-primary);
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+
+        .hint {
+          font-size: 0.85rem;
+          color: var(--text-muted);
+          font-style: italic;
+        }
+      }
+    }
+
+    .card-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding-top: 1.25rem;
+      margin-top: 1.25rem;
+      border-top: 2px solid var(--card-border);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--marvel-primary);
+      transition: all 0.3s ease;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      position: relative;
+
+      svg {
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        filter: drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3));
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--marvel-primary), var(--marvel-secondary));
+        transition: width 0.3s ease;
+      }
+    }
+
+    &:hover .card-action {
+      svg {
+        transform: translateX(8px) scale(1.2);
+      }
+
+      &::before {
+        width: 60%;
+      }
+    }
+  }
+
+  // Calendar & Events Card styles
+  .calendar-reminders-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 4px 12px var(--card-shadow);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out 0.4s both;
+
+    // Animated gradient overlay
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(102, 126, 234, 0.1),
+          transparent);
+      transition: left 0.6s ease;
+    }
+
+    &:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+      border-color: var(--marvel-primary);
+
+      &::before {
+        left: 100%;
+      }
+
+      .card-action {
+        color: var(--marvel-secondary);
+      }
+    }
+
+    .card-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--card-border);
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--marvel-primary), var(--marvel-secondary));
+        transition: width 0.4s ease;
+      }
+
+      h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+
+        svg {
+          color: var(--marvel-primary);
+          filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+        }
+      }
+    }
+
+    &:hover .card-header::after {
+      width: 100%;
+    }
+
+    .calendar-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 0.5rem 0;
+      position: relative;
+      z-index: 1;
+
+      // New calendar items container
+      .calendar-items-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+
+        .events-section,
+        .reminders-section {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+
+          .section-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 20px;
+            width: fit-content;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+
+            svg {
+              color: var(--marvel-primary);
+              filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+            }
+
+            .badge-count {
+              font-size: 0.75rem;
+              font-weight: 700;
+              color: var(--marvel-primary);
+              background: rgba(102, 126, 234, 0.15);
+              padding: 0.15rem 0.5rem;
+              border-radius: 12px;
+              min-width: 24px;
+              text-align: center;
+            }
+          }
+
+          .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+
+            .calendar-item {
+              display: flex;
+              align-items: flex-start;
+              gap: 1rem;
+              padding: 1rem;
+              background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+              border-radius: 12px;
+              border: 1px solid var(--card-border);
+              transition: all 0.3s ease;
+              position: relative;
+              overflow: hidden;
+
+              &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 3px;
+                background: linear-gradient(180deg, var(--marvel-primary), var(--marvel-secondary));
+                transform: scaleY(0);
+                transition: transform 0.3s ease;
+              }
+
+              &:hover {
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+                border-color: var(--marvel-primary);
+                transform: translateX(4px);
+
+                &::before {
+                  transform: scaleY(1);
+                }
+
+                .date-badge {
+                  transform: scale(1.05) rotate(-2deg);
+                  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                }
+
+                .bell-icon {
+                  animation: bellRing 0.5s ease;
+                }
+              }
+
+              .item-icon {
+                flex-shrink: 0;
+
+                .date-badge {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  width: 56px;
+                  height: 56px;
+                  background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
+                  border-radius: 12px;
+                  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+                  transition: all 0.3s ease;
+
+                  .day {
+                    font-size: 1.5rem;
+                    font-weight: 900;
+                    color: white;
+                    line-height: 1;
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                  }
+
+                  .month {
+                    font-size: 0.65rem;
+                    font-weight: 700;
+                    color: rgba(255, 255, 255, 0.9);
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    margin-top: 0.125rem;
+                  }
+                }
+
+                .bell-icon {
+                  width: 40px;
+                  height: 40px;
+                  padding: 8px;
+                  background: linear-gradient(135deg, rgba(255, 0, 110, 0.1), rgba(255, 77, 148, 0.1));
+                  border-radius: 50%;
+                  color: #ff006e;
+                  transition: all 0.3s ease;
+                }
+              }
+
+              .item-content {
+                flex: 1;
+                min-width: 0;
+
+                .item-title {
+                  font-size: 0.95rem;
+                  font-weight: 700;
+                  color: var(--text-primary);
+                  margin-bottom: 0.375rem;
+                  line-height: 1.3;
+                  letter-spacing: -0.01em;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  display: -webkit-box;
+                  -webkit-line-clamp: 2;
+                  -webkit-box-orient: vertical;
+                }
+
+                .item-time {
+                  font-size: 0.8rem;
+                  color: var(--text-secondary);
+                  font-weight: 600;
+                  margin-bottom: 0.25rem;
+                  display: flex;
+                  align-items: center;
+                  gap: 0.25rem;
+                }
+
+                .item-description {
+                  font-size: 0.75rem;
+                  color: var(--text-muted);
+                  line-height: 1.4;
+                  margin-top: 0.375rem;
+                  font-style: italic;
+                }
+              }
+            }
+
+            .more-items {
+              font-size: 0.8rem;
+              color: var(--marvel-primary);
+              font-weight: 600;
+              text-align: center;
+              padding: 0.5rem;
+              background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+              border-radius: 8px;
+              border: 1px dashed var(--card-border);
+              transition: all 0.3s ease;
+
+              &:hover {
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+                border-color: var(--marvel-primary);
+              }
+            }
+          }
+        }
+      }
+
+      .reminder-count {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        border-radius: 50%;
+        border: 3px solid var(--card-border);
+        transition: all 0.4s ease;
+
+        svg {
+          color: var(--marvel-primary);
+          animation: bellRing 2s ease-in-out infinite;
+          filter: drop-shadow(0 2px 8px rgba(102, 126, 234, 0.4));
+        }
+
+        .count {
+          position: absolute;
+          top: -8px;
+          right: -8px;
+          background: linear-gradient(135deg, #ff006e, #ff4d94);
           color: white;
+          font-size: 0.875rem;
+          font-weight: 800;
+          padding: 0.35rem 0.65rem;
+          border-radius: 20px;
+          min-width: 32px;
+          text-align: center;
+          box-shadow: 0 4px 12px rgba(255, 0, 110, 0.4);
+          animation: pulse 2s ease-in-out infinite;
+          border: 2px solid var(--card-bg);
+        }
+      }
 
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(var(--marvel-primary-rgb), 0.4);
+      .reminder-summary {
+        width: 100%;
+
+        .reminder-text {
+          font-size: 1rem;
+          color: var(--text-primary);
+          font-weight: 600;
+          margin-bottom: 1.25rem;
+          text-align: center;
+          line-height: 1.4;
+          letter-spacing: -0.01em;
+
+          &::before {
+            content: '📅 ';
+            font-size: 1.2em;
+            margin-right: 0.25rem;
           }
         }
 
-        &.btn-dismiss {
-          background: var(--card-border);
-          color: var(--text-secondary);
+        .reminder-preview {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
 
-          &:hover {
-            background: var(--input-bg);
-            color: var(--text-primary);
+          li {
+            padding: 0.875rem 1rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            border-left: 3px solid var(--marvel-primary);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+
+            &::before {
+              content: '🔔';
+              position: absolute;
+              left: -30px;
+              top: 50%;
+              transform: translateY(-50%);
+              font-size: 1.5rem;
+              opacity: 0.2;
+              transition: all 0.3s ease;
+            }
+
+            &:hover {
+              background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+              transform: translateX(4px);
+              border-left-color: var(--marvel-secondary);
+
+              &::before {
+                left: 10px;
+                opacity: 1;
+              }
+            }
+
+            strong {
+              color: var(--text-primary);
+              font-weight: 600;
+            }
           }
+        }
+      }
+
+      .no-calendar-data {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+        border-radius: 12px;
+        border: 2px dashed var(--card-border);
+
+        .calendar-icon-display {
+          position: relative;
+          display: inline-block;
+          margin-bottom: 1.5rem;
+
+          svg {
+            color: var(--marvel-primary);
+            opacity: 0.15;
+            filter: drop-shadow(0 2px 8px rgba(102, 126, 234, 0.2));
+          }
+
+          .today-date {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            .date-number {
+              font-size: 1.75rem;
+              font-weight: 900;
+              color: var(--marvel-primary);
+              line-height: 1;
+              margin-bottom: 0.125rem;
+              text-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+              letter-spacing: -0.02em;
+            }
+
+            .date-month {
+              font-size: 0.65rem;
+              font-weight: 700;
+              color: var(--marvel-secondary);
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+            }
+          }
+        }
+
+        .date-info {
+          margin-bottom: 1.5rem;
+          padding: 1rem 1.5rem;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+          border-radius: 12px;
+          border: 1px solid rgba(102, 126, 234, 0.15);
+
+          .full-date {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.375rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+
+          .year {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.05em;
+          }
+        }
+
+        .no-events-text {
+          font-size: 1rem;
+          color: var(--text-primary);
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+        }
+
+        p {
+          font-size: 1.125rem;
+          color: var(--text-secondary);
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+
+          &:first-child {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+          }
+
+          &.hint {
+            font-size: 0.825rem;
+            color: var(--text-muted);
+            font-style: italic;
+            font-weight: 400;
+          }
+        }
+      }
+    }
+
+    &:hover .reminder-count {
+      transform: scale(1.1) rotate(5deg);
+      border-color: var(--marvel-primary);
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    }
+
+    .card-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding-top: 1.25rem;
+      margin-top: 1.25rem;
+      border-top: 2px solid var(--card-border);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--marvel-primary);
+      transition: all 0.3s ease;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      position: relative;
+
+      svg {
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--marvel-primary), var(--marvel-secondary));
+        transition: width 0.3s ease;
+      }
+    }
+
+    &:hover .card-action {
+      svg {
+        transform: translateX(8px) scale(1.2);
+      }
+
+      &::before {
+        width: 60%;
+      }
+    }
+  }
+
+  // Additional animations for calendar card
+  @keyframes bellRing {
+
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+
+    10% {
+      transform: rotate(14deg);
+    }
+
+    20% {
+      transform: rotate(-8deg);
+    }
+
+    30% {
+      transform: rotate(14deg);
+    }
+
+    40% {
+      transform: rotate(-4deg);
+    }
+
+    50% {
+      transform: rotate(10deg);
+    }
+
+    60% {
+      transform: rotate(0deg);
+    }
+  }
+
+  @keyframes pulse {
+
+    0%,
+    100% {
+      transform: scale(1);
+      box-shadow: 0 4px 12px rgba(255, 0, 110, 0.4);
+    }
+
+    50% {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(255, 0, 110, 0.6);
+    }
+  }
+
+  // AI Assistant Floating Button - Premium Style
+  .ai-assistant-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      bottom: 1.5rem;
+      right: 1.5rem;
+    }
+
+    .ai-assistant-btn {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 8px 32px rgba(102, 126, 234, 0.4),
+        0 4px 16px rgba(118, 75, 162, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+
+      // Animated gradient ring
+      &::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        background: linear-gradient(45deg,
+            var(--marvel-primary),
+            var(--marvel-secondary),
+            #ff006e,
+            var(--marvel-primary));
+        background-size: 400% 400%;
+        z-index: -1;
+        animation: gradientRotate 3s ease infinite;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      // Inner glow effect
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
+        z-index: 0;
+      }
+
+      svg {
+        position: relative;
+        z-index: 1;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        transition: transform 0.3s ease;
+      }
+
+      // Pulse animation ring
+      .pulse-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid var(--marvel-primary);
+        animation: pulseRing 2s ease-out infinite;
+        opacity: 0;
+      }
+
+      &:hover {
+        transform: scale(1.1) translateY(-4px);
+        box-shadow:
+          0 12px 40px rgba(102, 126, 234, 0.5),
+          0 8px 24px rgba(118, 75, 162, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+
+        &::before {
+          opacity: 1;
+        }
+
+        svg {
+          transform: scale(1.1);
+        }
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      // Recording state
+      &.recording {
+        animation: recordingPulse 1.5s ease-in-out infinite;
+
+        &::before {
+          opacity: 1;
+          animation: gradientRotate 1s ease infinite;
+        }
+
+        svg {
+          animation: micBounce 0.5s ease infinite;
+        }
+      }
+
+      @media (max-width: 768px) {
+        width: 56px;
+        height: 56px;
+
+        svg {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    // AI Assistant Response Bubble
+    .ai-assistant-response {
+      position: absolute;
+      bottom: 80px;
+      right: 0;
+      width: 320px;
+      max-width: calc(100vw - 3rem);
+      padding: 1.25rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        0 4px 16px rgba(102, 126, 234, 0.1);
+      animation: slideUpFade 0.3s ease-out;
+
+      // Speech bubble tail
+      &::before {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        right: 24px;
+        width: 20px;
+        height: 20px;
+        background: var(--card-bg);
+        border-right: 1px solid var(--card-border);
+        border-bottom: 1px solid var(--card-border);
+        transform: rotate(45deg);
+        box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      @media (max-width: 768px) {
+        width: 280px;
+        bottom: 72px;
+        padding: 1rem;
+
+        p {
+          font-size: 0.875rem;
         }
       }
     }
   }
 
-  // Animations
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  // AI Assistant Animations
+  @keyframes gradientRotate {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
   }
 
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
+  @keyframes pulseRing {
+    0% {
+      transform: scale(1);
+      opacity: 0.8;
     }
-    to {
+
+    100% {
+      transform: scale(1.8);
+      opacity: 0;
+    }
+  }
+
+  @keyframes recordingPulse {
+
+    0%,
+    100% {
+      box-shadow:
+        0 8px 32px rgba(255, 0, 110, 0.4),
+        0 4px 16px rgba(255, 0, 110, 0.3);
+    }
+
+    50% {
+      box-shadow:
+        0 12px 48px rgba(255, 0, 110, 0.6),
+        0 8px 24px rgba(255, 0, 110, 0.4);
+    }
+  }
+
+  @keyframes micBounce {
+
+    0%,
+    100% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.15);
+    }
+  }
+
+  @keyframes slideUpFade {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    100% {
       opacity: 1;
       transform: translateY(0);
     }
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  // PIN Setup Prompt Styles
+  .pin-setup-prompt {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    z-index: 999;
+    animation: slideUpFade 0.4s ease-out;
+    max-width: 400px;
+    width: calc(100% - 2rem);
+
+    p {
+      margin: 0 0 1rem;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    .prompt-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+
+      .btn-setup {
+        padding: 0.625rem 1.25rem;
+        background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+      }
+
+      .btn-dismiss {
+        padding: 0.625rem 1.25rem;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: var(--card-hover);
+          color: var(--text-primary);
+        }
+      }
+    }
   }
 
-  @keyframes slideInLeft {
-    from {
-      opacity: 0;
-      transform: translateX(-30px);
+  // Time Capsule button glow animation
+  @keyframes glowPulse {
+
+    0%,
+    100% {
+      opacity: 0.6;
     }
-    to {
+
+    50% {
       opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes flameFlicker {
-    0%, 100% { transform: scale(1) rotate(0deg); }
-    25% { transform: scale(1.05) rotate(-5deg); }
-    50% { transform: scale(0.95) rotate(5deg); }
-    75% { transform: scale(1.05) rotate(-3deg); }
-  }
-
-  @keyframes growUp {
-    from {
-      height: 0;
-    }
-    to {
-      height: 100%;
-    }
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
     }
   }
 }

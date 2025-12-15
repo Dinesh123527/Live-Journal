@@ -1,17 +1,18 @@
+import Cookies from 'js-cookie';
+import { CheckCircle2, Eye, EyeOff, Lock, Mail, Shield, User, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Mail, User, Eye, EyeOff, Shield, CheckCircle2, XCircle } from 'lucide-react';
-import Cookies from 'js-cookie';
-import axios from '../../utils/axiosInstance';
-import Navbar from '../../components/Navbar/Navbar';
-import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 import MarvelThemeSelector from '../../components/MarvelThemeSelector/MarvelThemeSelector';
+import Navbar from '../../components/Navbar/Navbar';
+import ScrollProgressBar from '../../components/ScrollProgressBar/ScrollProgressBar';
+import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
+import axios from '../../utils/axiosInstance';
 import './Signup.scss';
 
 const Signup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -74,13 +75,12 @@ const Signup = () => {
     }
 
     try {
-      // Send only required fields to backend (not confirmPassword)
-      const { confirmPassword, ...signupData } = formData;
-      const response = await axios.post('/auth/signup', signupData);
+      // Send all fields including confirmPassword to backend
+      const response = await axios.post('/auth/register', formData);
 
       if (response.data.token) {
         // Store access token in cookies (expires in 1 hour)
-        Cookies.set('accessToken', response.data.token, { expires: 1/24 });
+        Cookies.set('accessToken', response.data.token, { expires: 1 / 24 });
 
         // Store user data in localStorage for quick access
         if (response.data.user) {
@@ -104,6 +104,7 @@ const Signup = () => {
   return (
     <>
       <Navbar showAuthButtons={false} />
+      <ScrollProgressBar />
       <div className="signup-page">
         {/* Theme Toggle and Marvel Theme Selector positioned at top-right */}
         <div className="theme-toggle-container">
@@ -132,8 +133,8 @@ const Signup = () => {
                   <input
                     type="text"
                     id="username"
-                    name="username"
-                    value={formData.username}
+                    name="name"
+                    value={formData.name}
                     onChange={handleChange}
                     placeholder="Choose a username"
                     required
@@ -172,7 +173,7 @@ const Signup = () => {
                     placeholder="Create a password"
                     required
                     autoComplete="new-password"
-                    minLength={6}
+                    minLength={8}
                   />
                   <button
                     type="button"
@@ -185,8 +186,8 @@ const Signup = () => {
                 </div>
                 {passwordTouched && formData.password && (
                   <div className="password-strength">
-                    <span className={`strength-indicator ${formData.password.length >= 6 ? 'strong' : 'weak'}`}>
-                      {formData.password.length >= 6 ? '✓' : '✗'} Minimum 6 characters
+                    <span className={`strength-indicator ${formData.password.length >= 8 ? 'strong' : 'weak'}`}>
+                      {formData.password.length >= 8 ? '✓' : '✗'} Minimum 8 characters
                     </span>
                   </div>
                 )}
@@ -205,7 +206,7 @@ const Signup = () => {
                     placeholder="Confirm your password"
                     required
                     autoComplete="new-password"
-                    minLength={6}
+                    minLength={8}
                   />
                   <button
                     type="button"

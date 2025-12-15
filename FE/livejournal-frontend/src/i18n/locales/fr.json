@@ -1,0 +1,104 @@
+{
+  "navbar": {
+    "brand": "Live Journal",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "logout": "Déconnexion"
+  },
+  "landing": {
+    "hero": {
+      "title1": "Vos Pensées,",
+      "title2": "Magnifiquement Capturées",
+      "description": "Une expérience de journalisation moderne propulsée par l'IA. Suivez votre humeur, organisez vos pensées et découvrez des informations sur vous-même.",
+      "cta": "Commencer à Écrire"
+    },
+    "features": {
+      "heading": "Tout ce dont Vous Avez Besoin",
+      "subheading": "Des fonctionnalités puissantes pour mieux écrire",
+      "aiPowered": {
+        "title": "Propulsé par l'IA",
+        "description": "Analyses intelligentes et analyse de l'humeur pour vos entrées"
+      },
+      "secure": {
+        "title": "Sécurisé et Privé",
+        "description": "Le chiffrement de bout en bout protège vos pensées"
+      },
+      "mood": {
+        "title": "Suivez Votre Humeur",
+        "description": "Visualisez les tendances émotionnelles au fil du temps"
+      },
+      "design": {
+        "title": "Beau Design",
+        "description": "Interface inspirée d'Apple avec mode sombre"
+      },
+      "search": {
+        "title": "Recherche Puissante",
+        "description": "Trouvez n'importe quelle entrée instantanément"
+      },
+      "drafts": {
+        "title": "Sauvegarde Auto",
+        "description": "Ne perdez jamais vos pensées avec les brouillons automatiques"
+      }
+    },
+    "cta": {
+      "heading": "Prêt à Commencer Votre Voyage?",
+      "description": "Rejoignez des milliers de personnes qui écrivent avec nous chaque jour",
+      "button": "Créer un Compte"
+    },
+    "footer": {
+      "copyright": "© 2025 Live Journal. Vos pensées, votre vie privée.",
+      "privacy": "Politique de Confidentialité",
+      "terms": "Conditions d'Utilisation",
+      "contact": "Contact"
+    }
+  },
+  "login": {
+    "title": "Bon Retour",
+    "subtitle": "Connectez-vous pour continuer votre voyage",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié?",
+    "submit": "Se Connecter",
+    "noAccount": "Vous n'avez pas de compte?",
+    "signUp": "S'inscrire"
+  },
+  "signup": {
+    "title": "Commencez Votre Voyage",
+    "subtitle": "Créez votre compte et commencez à écrire",
+    "name": "Nom Complet",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le Mot de passe",
+    "submit": "Créer un Compte",
+    "hasAccount": "Vous avez déjà un compte?",
+    "signIn": "Se connecter"
+  },
+  "terms": {
+    "title": "Conditions d'Utilisation",
+    "lastUpdated": "Dernière mise à jour"
+  },
+  "privacy": {
+    "title": "Politique de Confidentialité",
+    "lastUpdated": "Dernière mise à jour"
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "subtitle": "Nous serions ravis d'avoir de vos nouvelles",
+    "name": "Votre Nom",
+    "email": "Votre E-mail",
+    "message": "Message",
+    "submit": "Envoyer le Message"
+  },
+  "language": {
+    "select": "Choisir la Langue",
+    "en": "Anglais",
+    "es": "Espagnol",
+    "fr": "Français",
+    "de": "Allemand",
+    "hi": "Hindi",
+    "zh": "Chinois",
+    "ja": "Japonais",
+    "ar": "Arabe"
+  }
+}

@@ -1,21 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  Search as SearchIcon,
-  X,
+  ArrowLeft,
+  ArrowUpDown,
+  BookOpen,
   Calendar,
+  Filter,
+  Globe,
+  Loader,
+  Lock,
+  Mic,
+  MicOff,
+  Search as SearchIcon,
   Tag,
   TrendingUp,
-  Filter,
-  ArrowUpDown,
-  Loader,
-  BookOpen,
-  Lock,
-  Globe
+  X
 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar.jsx';
+import { useVapiJournal } from '../../hooks/useVapiJournal';
 import axiosInstance from '../../utils/axiosInstance';
-import { formatName } from '../../utils/helpers';
 import './Search.scss';
 
 const Search = () => {
@@ -23,6 +26,7 @@ const Search = () => {
 
   // User info
   const [username, setUsername] = useState('User');
+  const [userEmail, setUserEmail] = useState('user@example.com');
 
   // Search states
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,6 +50,18 @@ const Search = () => {
   // Pagination
   const [page, setPage] = useState(1);
   const pageSize = 20;
+
+  // VAPI Voice Search states
+  const {
+    startRecording,
+    stopRecording,
+    isRecording,
+    transcript,
+    clearTranscript,
+    error: vapiError
+  } = useVapiJournal();
+
+  const [voiceSearchActive, setVoiceSearchActive] = useState(false);
 
   // Mood options
   const moodOptions = [
@@ -77,6 +93,7 @@ const Search = () => {
         const response = await axiosInstance.get('/auth/me');
         if (response.data && response.data.user) {
           setUsername(response.data.user.name || 'User');
+          setUserEmail(response.data.user.email || 'user@example.com');
         }
       } catch (err) {
         console.error('Failed to fetch user info:', err);
@@ -245,13 +262,101 @@ const Search = () => {
     return text.substring(0, maxLength) + '...';
   };
 
-  const userProfileInfo = { name: username };
+  // Parse voice commands for search
+  useEffect(() => {
+    if (transcript && voiceSearchActive) {
+      parseVoiceSearchCommand(transcript);
+    }
+  }, [transcript, voiceSearchActive]);
+
+  const parseVoiceSearchCommand = (text) => {
+    const lowerText = text.toLowerCase();
+
+    // Extract search query
+    if (lowerText.includes('search for') || lowerText.includes('find')) {
+      const searchMatch = text.match(/(?:search for|find)\s+(.+?)(?:\s+(?:tagged|with mood|from|in|$))/i);
+      if (searchMatch && searchMatch[1]) {
+        setSearchQuery(searchMatch[1].trim());
+      }
+    }
+
+    // Extract mood filter
+    const moodKeywords = ['happy', 'sad', 'angry', 'stressed', 'excited', 'calm', 'anxious', 'neutral', 'joyful', 'content'];
+    moodKeywords.forEach(moodKeyword => {
+      if (lowerText.includes(moodKeyword)) {
+        setMood(moodKeyword);
+      }
+    });
+
+    // Extract tags
+    if (lowerText.includes('tagged') || lowerText.includes('with tag')) {
+      const tagMatch = text.match(/(?:tagged|with tag)\s+(.+?)(?:\s+(?:from|in|$))/i);
+      if (tagMatch && tagMatch[1]) {
+        const tags = tagMatch[1].split(/(?:and|,)\s*/).map(t => t.trim()).filter(Boolean);
+        setSelectedTags(tags);
+      }
+    }
+
+    // Extract date ranges
+    if (lowerText.includes('last week')) {
+      const today = new Date();
+      const lastWeek = new Date(today);
+      lastWeek.setDate(today.getDate() - 7);
+      setDateFrom(lastWeek.toISOString().split('T')[0]);
+      setDateTo(today.toISOString().split('T')[0]);
+    } else if (lowerText.includes('last month')) {
+      const today = new Date();
+      const lastMonth = new Date(today);
+      lastMonth.setMonth(today.getMonth() - 1);
+      setDateFrom(lastMonth.toISOString().split('T')[0]);
+      setDateTo(today.toISOString().split('T')[0]);
+    } else if (lowerText.includes('today')) {
+      const today = new Date().toISOString().split('T')[0];
+      setDateFrom(today);
+      setDateTo(today);
+    } else if (lowerText.includes('yesterday')) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      setDateFrom(yesterdayStr);
+      setDateTo(yesterdayStr);
+    }
+
+    // Trigger search if we have commands
+    if (lowerText.includes('search') || lowerText.includes('find')) {
+      setTimeout(() => {
+        setPage(1);
+        performSearch();
+      }, 500);
+    }
+  };
+
+  const toggleVoiceSearch = async () => {
+    if (isRecording) {
+      stopRecording();
+      setVoiceSearchActive(false);
+    } else {
+      clearTranscript();
+      setVoiceSearchActive(true);
+      await startRecording();
+    }
+  };
+
+  const userProfileInfo = { name: username, email: userEmail };
 
   return (
     <div className="search-page">
       <Navbar isAuthenticated={true} userProfileInfo={userProfileInfo} />
 
       <div className="search-content">
+        {/* Back Button Header - Like EntryEditor */}
+        <div className="search-top-header">
+          <button className="back-btn" onClick={() => navigate('/dashboard')}>
+            <ArrowLeft size={18} />
+            <span>Back to Dashboard</span>
+          </button>
+        </div>
+
         {/* Header */}
         <div className="search-header">
           <h1>Search Your Journal</h1>
@@ -291,27 +396,39 @@ const Search = () => {
           </button>
         </form>
 
-        {/* Filters Toggle */}
-        <div className="filters-toggle">
-          <button
-            className={`toggle-filters-btn ${showFilters ? 'active' : ''}`}
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter size={18} />
-            <span>Filters</span>
-            {(mood || selectedTags.length > 0 || dateFrom || dateTo) && (
-              <span className="active-filters-count">
-                {[mood, ...selectedTags, dateFrom, dateTo].filter(Boolean).length}
-              </span>
-            )}
-          </button>
-
-          {(mood || selectedTags.length > 0 || dateFrom || dateTo || searchQuery) && (
-            <button className="clear-all-btn" onClick={clearFilters}>
-              <X size={16} />
-              <span>Clear All</span>
+        {/* Action Buttons Row: Filters + Voice Search */}
+        <div className="search-actions-row">
+          {/* Filters Button */}
+          <div className="filters-toggle">
+            <button
+              className={`toggle-filters-btn ${showFilters ? 'active' : ''}`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={18} />
+              <span>Filters</span>
+              {(mood || selectedTags.length > 0 || dateFrom || dateTo) && (
+                <span className="active-filters-count">
+                  {[mood, ...selectedTags, dateFrom, dateTo].filter(Boolean).length}
+                </span>
+              )}
             </button>
-          )}
+
+            {(mood || selectedTags.length > 0 || dateFrom || dateTo || searchQuery) && (
+              <button className="clear-all-btn" onClick={clearFilters}>
+                <X size={16} />
+                <span>Clear All</span>
+              </button>
+            )}
+          </div>
+
+          <button
+            className={`voice-search-btn ${isRecording ? 'recording' : ''}`}
+            onClick={toggleVoiceSearch}
+            title={isRecording ? 'Stop Voice Search' : 'Start Voice Search'}
+          >
+            {isRecording ? <MicOff size={20} /> : <Mic size={20} />}
+            <span>{isRecording ? 'Stop Search' : 'Voice Search'}</span>
+          </button>
         </div>
 
         {/* Filters Panel */}
@@ -360,26 +477,189 @@ const Search = () => {
             </div>
 
             {/* Date Range Filter */}
-            <div className="filter-group">
+            <div className="filter-group date-range-group">
               <label>
                 <Calendar size={16} />
                 <span>Date Range</span>
               </label>
-              <div className="date-range">
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  max={dateTo || new Date().toISOString().split('T')[0]}
-                />
-                <span>to</span>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  min={dateFrom}
-                  max={new Date().toISOString().split('T')[0]}
-                />
+
+              {/* Quick Date Presets */}
+              <div className="date-presets">
+                <button
+                  className={`preset-btn ${!dateFrom && !dateTo ? 'active' : ''}`}
+                  onClick={() => {
+                    setDateFrom('');
+                    setDateTo('');
+                  }}
+                >
+                  All Time
+                </button>
+                <button
+                  className={`preset-btn ${(() => {
+                    const today = new Date().toISOString().split('T')[0];
+                    return dateFrom === today && dateTo === today;
+                  })() ? 'active' : ''}`}
+                  onClick={() => {
+                    const today = new Date().toISOString().split('T')[0];
+                    setDateFrom(today);
+                    setDateTo(today);
+                  }}
+                >
+                  Today
+                </button>
+                <button
+                  className={`preset-btn ${(() => {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    return dateFrom === yesterdayStr && dateTo === yesterdayStr;
+                  })() ? 'active' : ''}`}
+                  onClick={() => {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    setDateFrom(yesterdayStr);
+                    setDateTo(yesterdayStr);
+                  }}
+                >
+                  Yesterday
+                </button>
+                <button
+                  className={`preset-btn ${(() => {
+                    const today = new Date();
+                    const lastWeek = new Date(today);
+                    lastWeek.setDate(today.getDate() - 7);
+                    const fromStr = lastWeek.toISOString().split('T')[0];
+                    const toStr = today.toISOString().split('T')[0];
+                    return dateFrom === fromStr && dateTo === toStr;
+                  })() ? 'active' : ''}`}
+                  onClick={() => {
+                    const today = new Date();
+                    const lastWeek = new Date(today);
+                    lastWeek.setDate(today.getDate() - 7);
+                    setDateFrom(lastWeek.toISOString().split('T')[0]);
+                    setDateTo(today.toISOString().split('T')[0]);
+                  }}
+                >
+                  Last 7 Days
+                </button>
+                <button
+                  className={`preset-btn ${(() => {
+                    const today = new Date();
+                    const lastMonth = new Date(today);
+                    lastMonth.setDate(today.getDate() - 30);
+                    const fromStr = lastMonth.toISOString().split('T')[0];
+                    const toStr = today.toISOString().split('T')[0];
+                    return dateFrom === fromStr && dateTo === toStr;
+                  })() ? 'active' : ''}`}
+                  onClick={() => {
+                    const today = new Date();
+                    const lastMonth = new Date(today);
+                    lastMonth.setDate(today.getDate() - 30);
+                    setDateFrom(lastMonth.toISOString().split('T')[0]);
+                    setDateTo(today.toISOString().split('T')[0]);
+                  }}
+                >
+                  Last 30 Days
+                </button>
+                <button
+                  className={`preset-btn ${(() => {
+                    const today = new Date();
+                    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                    const fromStr = startOfMonth.toISOString().split('T')[0];
+                    const toStr = today.toISOString().split('T')[0];
+                    return dateFrom === fromStr && dateTo === toStr;
+                  })() ? 'active' : ''}`}
+                  onClick={() => {
+                    const today = new Date();
+                    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                    setDateFrom(startOfMonth.toISOString().split('T')[0]);
+                    setDateTo(today.toISOString().split('T')[0]);
+                  }}
+                >
+                  This Month
+                </button>
+              </div>
+
+              {/* Custom Date Range */}
+              <div className="custom-date-range">
+                <div className="date-input-wrapper">
+                  <div className="date-input-group">
+                    <div
+                      className="date-input-container"
+                      onClick={(e) => {
+                        // If clicking on the container, focus the input to open calendar
+                        if (e.target.classList.contains('date-input-container')) {
+                          e.currentTarget.querySelector('input').showPicker?.();
+                        }
+                      }}
+                    >
+                      <Calendar size={14} className="date-icon" />
+                      <input
+                        type="date"
+                        value={dateFrom}
+                        onChange={(e) => setDateFrom(e.target.value)}
+                        max={dateTo || new Date().toISOString().split('T')[0]}
+                        className="enhanced-date-input"
+                        placeholder="Start date"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="date-separator">
+                    <div className="separator-line"></div>
+                    <span className="separator-icon">→</span>
+                    <div className="separator-line"></div>
+                  </div>
+
+                  <div className="date-input-group">
+                    <div
+                      className="date-input-container"
+                      onClick={(e) => {
+                        // If clicking on the container, focus the input to open calendar
+                        if (e.target.classList.contains('date-input-container')) {
+                          e.currentTarget.querySelector('input').showPicker?.();
+                        }
+                      }}
+                    >
+                      <Calendar size={14} className="date-icon" />
+                      <input
+                        type="date"
+                        value={dateTo}
+                        onChange={(e) => setDateTo(e.target.value)}
+                        min={dateFrom}
+                        max={new Date().toISOString().split('T')[0]}
+                        className="enhanced-date-input"
+                        placeholder="End date"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Date Range Info */}
+                {dateFrom && dateTo && (
+                  <div className="date-range-info">
+                    <span className="range-badge">
+                      {(() => {
+                        const from = new Date(dateFrom);
+                        const to = new Date(dateTo);
+                        const diffTime = Math.abs(to - from);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                        return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} selected`;
+                      })()}
+                    </span>
+                    <button
+                      className="clear-dates-btn"
+                      onClick={() => {
+                        setDateFrom('');
+                        setDateTo('');
+                      }}
+                      title="Clear dates"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

@@ -1,21 +1,31 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowRight, BookOpen, TrendingUp, Shield } from 'lucide-react';
 import Cookies from 'js-cookie';
+import { ArrowRight, Bell, BookOpen, Calendar, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../../components/Navbar/Navbar.jsx';
+import ScrollProgressBar from '../../components/ScrollProgressBar/ScrollProgressBar.jsx';
 import axiosInstance from '../../utils/axiosInstance';
 import { formatName } from '../../utils/helpers';
-import Navbar from '../../components/Navbar/Navbar.jsx';
 import './Welcome.scss';
 
 const Welcome = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [currentText, setCurrentText] = useState('');
   const [aiGreeting, setAiGreeting] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
   const [timeBasedGreeting, setTimeBasedGreeting] = useState('Hello');
+
+  // New state for stats
+  const [stats, setStats] = useState({
+    totalEntries: 0,
+    upcomingEvents: 0,
+    activeReminders: 0,
+    isLoadingStats: true
+  });
 
   // Function to get time-based greeting
   const getTimeBasedGreeting = () => {
@@ -57,7 +67,9 @@ const Welcome = () => {
         // Fetch user info
         const userResponse = await axiosInstance.get('/auth/me');
         const userName = userResponse.data.user.name || 'there';
+        const email = userResponse.data.user.email || '';
         setUsername(userName);
+        setUserEmail(email);
         // Format name for display (max 25 characters for greeting)
         setDisplayName(formatName(userName, 25));
 
@@ -65,6 +77,9 @@ const Welcome = () => {
         const greetingResponse = await axiosInstance.get('/ai/welcome-greeting');
         setAiGreeting(greetingResponse.data.greeting);
         setIsNewUser(greetingResponse.data.isNewUser);
+
+        // Fetch stats data
+        await fetchStats();
       } catch (error) {
         console.error('Failed to fetch data:', error);
         setUsername('there');
@@ -78,6 +93,53 @@ const Welcome = () => {
 
     fetchData();
   }, [navigate]);
+
+  // New function to fetch stats
+  const fetchStats = async () => {
+    try {
+      // Get date range for events (next 30 days)
+      const today = new Date();
+      const futureDate = new Date();
+      futureDate.setDate(today.getDate() + 30);
+
+      const formatDate = (date) => {
+        return date.toISOString().split('T')[0];
+      };
+
+      const fromDate = formatDate(today);
+      const toDate = formatDate(futureDate);
+
+      // Fetch all stats in parallel
+      const [entriesRes, eventsRes, remindersRes] = await Promise.allSettled([
+        axiosInstance.get('/entries?limit=1000'), // Get all entries to count them
+        axiosInstance.get(`/events?from=${fromDate}&to=${toDate}`),
+        axiosInstance.get('/reminders/upcoming?days=30')
+      ]);
+
+      // Extract counts from responses
+      const totalEntries = entriesRes.status === 'fulfilled'
+        ? (entriesRes.value.data.data?.length || 0)
+        : 0;
+
+      const upcomingEvents = eventsRes.status === 'fulfilled'
+        ? (eventsRes.value.data.events?.length || 0)
+        : 0;
+
+      const activeReminders = remindersRes.status === 'fulfilled'
+        ? (remindersRes.value.data.reminders?.length || 0)
+        : 0;
+
+      setStats({
+        totalEntries,
+        upcomingEvents,
+        activeReminders,
+        isLoadingStats: false
+      });
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+      setStats(prev => ({ ...prev, isLoadingStats: false }));
+    }
+  };
 
   // Typing animation for AI greeting
   useEffect(() => {
@@ -96,38 +158,45 @@ const Welcome = () => {
     return () => clearInterval(timer);
   }, [aiGreeting]);
 
-  const features = [
+  const statsCards = [
     {
       icon: <BookOpen />,
       emoji: '📝',
-      title: 'Smart Writing',
-      description: 'AI-assisted journaling with intelligent suggestions',
-      color: 'blue'
+      title: 'Journal Entries',
+      count: stats.totalEntries,
+      description: stats.totalEntries === 1 ? 'entry written' : 'entries written',
+      color: 'blue',
+      onClick: () => navigate('/entries')
     },
     {
-      icon: <TrendingUp />,
-      emoji: '📊',
-      title: 'Mood Tracking',
-      description: 'Visualize your emotions and mental patterns',
-      color: 'purple'
+      icon: <Calendar />,
+      emoji: '📅',
+      title: 'Upcoming Events',
+      count: stats.upcomingEvents,
+      description: stats.upcomingEvents === 1 ? 'event scheduled' : 'events scheduled',
+      color: 'purple',
+      onClick: () => navigate('/calendar')
     },
     {
-      icon: <Shield />,
-      emoji: '🔒',
-      title: 'Private & Secure',
-      description: 'End-to-end encrypted, your thoughts stay yours',
-      color: 'pink'
+      icon: <Bell />,
+      emoji: '🔔',
+      title: 'Active Reminders',
+      count: stats.activeReminders,
+      description: stats.activeReminders === 1 ? 'reminder set' : 'reminders set',
+      color: 'pink',
+      onClick: () => navigate('/dashboard')
     }
   ];
 
-  // Create user profile info object
   const userProfileInfo = {
-    name: username, // Keep full name for profile
+    name: username,
+    email: userEmail,
   };
 
   return (
     <div className="welcome-page">
       <Navbar isAuthenticated={true} userProfileInfo={userProfileInfo} />
+      <ScrollProgressBar />
 
       <div className="background-decoration">
         <div className="floating-circle circle-1"></div>
@@ -166,21 +235,29 @@ const Welcome = () => {
             </div>
           </div>
 
-          {/* Feature Cards Grid */}
-          <div className="features-grid">
-            {features.map((feature, index) => (
+          {/* Stats Cards Grid */}
+          <div className="features-grid stats-grid">
+            {statsCards.map((stat, index) => (
               <div
                 key={index}
-                className={`feature-card feature-${feature.color}`}
+                className={`feature-card stat-card feature-${stat.color}`}
+                onClick={stat.onClick}
               >
                 <div className="feature-icon-wrapper">
                   <div className="feature-icon">
-                    {feature.icon}
+                    {stat.icon}
                   </div>
-                  <span className="feature-emoji">{feature.emoji}</span>
+                  <span className="feature-emoji">{stat.emoji}</span>
                 </div>
-                <h3>{feature.title}</h3>
-                <p>{feature.description}</p>
+                <div className="stat-count">
+                  {stats.isLoadingStats ? (
+                    <span className="loading-spinner">...</span>
+                  ) : (
+                    stat.count
+                  )}
+                </div>
+                <h3>{stat.title}</h3>
+                <p>{stat.description}</p>
               </div>
             ))}
           </div>

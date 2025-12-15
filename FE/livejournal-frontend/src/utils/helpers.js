@@ -85,3 +85,38 @@ export const truncateText = (text, maxLength = 100) => {
   return text.substring(0, maxLength - 3) + '...';
 };
 
+
+export const stripHtmlTags = (html) => {
+  if (!html || typeof html !== 'string') return '';
+
+  // Create a temporary div element to parse HTML
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+
+  // Get text content (this automatically strips all HTML tags and decodes entities)
+  const text = tempDiv.textContent || tempDiv.innerText || '';
+
+  // Clean up extra whitespace and newlines
+  return text.replace(/\s+/g, ' ').trim();
+};
+
+/**
+ * Truncate HTML content by extracting text first, then truncating
+ * @param {string} html - HTML string
+ * @param {number} maxLength - Maximum length of text
+ * @returns {string} Truncated plain text
+ */
+export const truncateHtmlContent = (html, maxLength) => {
+  if (!html) return '';
+
+  const plainText = stripHtmlTags(html);
+
+  if (plainText.length <= maxLength) return plainText;
+
+  return plainText.substring(0, maxLength) + '...';
+};
+
+
+export const getHtmlPreview = (html, maxLength = 200) => {
+  return truncateHtmlContent(html, maxLength);
+};

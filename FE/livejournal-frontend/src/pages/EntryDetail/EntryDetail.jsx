@@ -21,10 +21,11 @@ const EntryDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const [entry, setEntry] = useState(null);
   const [error, setError] = useState(null);
   const [username, setUsername] = useState('User');
-  const [deleting, setDeleting] = useState(false);
+  const [userEmail, setUserEmail] = useState('user@example.com');
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Fetch user info
@@ -34,6 +35,7 @@ const EntryDetail = () => {
         const response = await axiosInstance.get('/auth/me');
         if (response.data && response.data.user) {
           setUsername(response.data.user.name || 'User');
+          setUserEmail(response.data.user.email || 'user@example.com');
         }
       } catch (err) {
         console.error('Failed to fetch user info:', err);
@@ -132,7 +134,10 @@ const EntryDetail = () => {
     return [];
   };
 
-  const userProfileInfo = { name: username };
+  const userProfileInfo = {
+    name: username,
+    email: userEmail,
+  };
 
   if (loading) {
     return (

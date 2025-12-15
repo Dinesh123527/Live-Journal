@@ -1,0 +1,104 @@
+{
+  "navbar": {
+    "brand": "Live Journal",
+    "login": "ログイン",
+    "signup": "新規登録",
+    "logout": "ログアウト"
+  },
+  "landing": {
+    "hero": {
+      "title1": "あなたの思い、",
+      "title2": "美しく記録",
+      "description": "AIを活用した現代的なジャーナリング体験。気分を追跡し、思考を整理し、自分自身についての洞察を発見しましょう。",
+      "cta": "始める"
+    },
+    "features": {
+      "heading": "必要なすべてを",
+      "subheading": "より良いジャーナリングのための強力な機能",
+      "aiPowered": {
+        "title": "AI搭載",
+        "description": "エントリーのスマートな洞察と気分分析"
+      },
+      "secure": {
+        "title": "安全でプライベート",
+        "description": "エンドツーエンド暗号化があなたの思考を守ります"
+      },
+      "mood": {
+        "title": "気分を追跡",
+        "description": "時間経過による感情パターンを可視化"
+      },
+      "design": {
+        "title": "美しいデザイン",
+        "description": "ダークモード対応のApple風インターフェース"
+      },
+      "search": {
+        "title": "強力な検索",
+        "description": "スマート検索で任意のエントリーを即座に検索"
+      },
+      "drafts": {
+        "title": "自動保存",
+        "description": "自動下書きで思考を失うことはありません"
+      }
+    },
+    "cta": {
+      "heading": "旅を始める準備はできましたか？",
+      "description": "毎日私たちと一緒に書いている何千人もの人々に参加しましょう",
+      "button": "アカウントを作成"
+    },
+    "footer": {
+      "copyright": "© 2025 Live Journal。あなたの思考、あなたのプライバシー。",
+      "privacy": "プライバシーポリシー",
+      "terms": "利用規約",
+      "contact": "お問い合わせ"
+    }
+  },
+  "login": {
+    "title": "おかえりなさい",
+    "subtitle": "旅を続けるためにサインインしてください",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "rememberMe": "ログイン状態を保持",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "submit": "サインイン",
+    "noAccount": "アカウントをお持ちでないですか？",
+    "signUp": "新規登録"
+  },
+  "signup": {
+    "title": "旅を始めましょう",
+    "subtitle": "アカウントを作成してジャーナリングを始めましょう",
+    "name": "氏名",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "confirmPassword": "パスワードを確認",
+    "submit": "アカウントを作成",
+    "hasAccount": "すでにアカウントをお持ちですか？",
+    "signIn": "サインイン"
+  },
+  "terms": {
+    "title": "利用規約",
+    "lastUpdated": "最終更新"
+  },
+  "privacy": {
+    "title": "プライバシーポリシー",
+    "lastUpdated": "最終更新"
+  },
+  "contact": {
+    "title": "お問い合わせ",
+    "subtitle": "ご連絡をお待ちしております",
+    "name": "お名前",
+    "email": "メールアドレス",
+    "message": "メッセージ",
+    "submit": "送信"
+  },
+  "language": {
+    "select": "言語を選択",
+    "en": "英語",
+    "es": "スペイン語",
+    "fr": "フランス語",
+    "de": "ドイツ語",
+    "hi": "ヒンディー語",
+    "zh": "中国語",
+    "ja": "日本語",
+    "ar": "アラビア語"
+  }
+}

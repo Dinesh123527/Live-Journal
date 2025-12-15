@@ -56,9 +56,14 @@ async function init() {
         mood_score FLOAT,
         tags JSON NULL,
         is_private TINYINT(1) DEFAULT 1,
+        is_time_capsule TINYINT(1) DEFAULT 0,
+        unlock_at DATETIME NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX (user_id),
+        INDEX (is_time_capsule),
+        INDEX (unlock_at)
       );
 
       CREATE TABLE IF NOT EXISTS moods_summary (
@@ -217,6 +222,71 @@ async function init() {
         INDEX (tag),
         INDEX (entry_id),
         UNIQUE KEY uq_entry_tag (entry_id, tag)
+      );
+
+      CREATE TABLE IF NOT EXISTS events (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NULL,
+        start_datetime DATETIME NOT NULL,
+        end_datetime DATETIME NULL,
+        all_day TINYINT(1) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX (user_id),
+        INDEX (start_datetime),
+        INDEX (end_datetime)
+      );
+
+      CREATE TABLE IF NOT EXISTS reminders (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        event_id INT NULL,
+        title VARCHAR(255) NOT NULL,
+        remind_at DATETIME NOT NULL,
+        repeat_rule VARCHAR(50) DEFAULT 'none', -- none, daily, weekly, monthly, yearly
+        channel VARCHAR(50) DEFAULT 'in_app',   -- in_app for now
+        is_active TINYINT(1) DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+        INDEX (user_id),
+        INDEX (remind_at),
+        INDEX (is_active)
+      );
+      
+      CREATE TABLE IF NOT EXISTS learning_moments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        text VARCHAR(300) NOT NULL,
+        category VARCHAR(50) NULL,
+        mood_label VARCHAR(50),
+        mood_score FLOAT,
+        tags JSON NULL,
+        date DATE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_user_date (user_id, date),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS life_chapters (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        title VARCHAR(150) NOT NULL,
+        description TEXT NULL,
+        start_date DATE NOT NULL,
+        end_date DATE NULL,
+        is_active TINYINT(1) DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX (user_id),
+        INDEX (is_active),
+        INDEX (start_date),
+        INDEX (end_date)
       );
     `;
 

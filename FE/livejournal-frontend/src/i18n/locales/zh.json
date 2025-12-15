@@ -1,0 +1,104 @@
+{
+  "navbar": {
+    "brand": "Live Journal",
+    "login": "登录",
+    "signup": "注册",
+    "logout": "退出"
+  },
+  "landing": {
+    "hero": {
+      "title1": "您的思想,",
+      "title2": "优雅地记录",
+      "description": "由人工智能驱动的现代日记体验。追踪您的心情，整理您的思绪，发现关于自己的见解。",
+      "cta": "开始记录"
+    },
+    "features": {
+      "heading": "您需要的一切",
+      "subheading": "帮助您更好地写作的强大功能",
+      "aiPowered": {
+        "title": "AI驱动",
+        "description": "为您的日记条目提供智能洞察和情绪分析"
+      },
+      "secure": {
+        "title": "安全私密",
+        "description": "端到端加密保护您的思想安全"
+      },
+      "mood": {
+        "title": "追踪心情",
+        "description": "可视化随时间变化的情绪模式"
+      },
+      "design": {
+        "title": "精美设计",
+        "description": "苹果风格的界面，支持深色模式"
+      },
+      "search": {
+        "title": "强大搜索",
+        "description": "通过智能搜索即时找到任何条目"
+      },
+      "drafts": {
+        "title": "自动保存",
+        "description": "自动草稿功能让您永不丢失思想"
+      }
+    },
+    "cta": {
+      "heading": "准备开始您的旅程了吗？",
+      "description": "加入每天与我们一起写作的数千人",
+      "button": "创建账户"
+    },
+    "footer": {
+      "copyright": "© 2025 Live Journal。您的思想，您的隐私。",
+      "privacy": "隐私政策",
+      "terms": "服务条款",
+      "contact": "联系我们"
+    }
+  },
+  "login": {
+    "title": "欢迎回来",
+    "subtitle": "登录以继续您的旅程",
+    "email": "邮箱",
+    "password": "密码",
+    "rememberMe": "记住我",
+    "forgotPassword": "忘记密码？",
+    "submit": "登录",
+    "noAccount": "还没有账户？",
+    "signUp": "注册"
+  },
+  "signup": {
+    "title": "开始您的旅程",
+    "subtitle": "创建账户并开始写作",
+    "name": "全名",
+    "email": "邮箱",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "submit": "创建账户",
+    "hasAccount": "已有账户？",
+    "signIn": "登录"
+  },
+  "terms": {
+    "title": "服务条款",
+    "lastUpdated": "最后更新"
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "lastUpdated": "最后更新"
+  },
+  "contact": {
+    "title": "联系我们",
+    "subtitle": "我们很乐意听到您的意见",
+    "name": "您的姓名",
+    "email": "您的邮箱",
+    "message": "消息",
+    "submit": "发送消息"
+  },
+  "language": {
+    "select": "选择语言",
+    "en": "英语",
+    "es": "西班牙语",
+    "fr": "法语",
+    "de": "德语",
+    "hi": "印地语",
+    "zh": "中文",
+    "ja": "日语",
+    "ar": "阿拉伯语"
+  }
+}

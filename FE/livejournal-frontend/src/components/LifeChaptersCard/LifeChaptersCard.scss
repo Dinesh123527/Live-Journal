@@ -1,0 +1,244 @@
+// Life Chapters Card - Dashboard Integration
+// Reflective, book-like design with soft glow
+
+.life-chapters-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+
+    // Subtle book-like texture
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg,
+                rgba(139, 92, 246, 0.3),
+                rgba(168, 85, 247, 0.5),
+                rgba(139, 92, 246, 0.3));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 8px 30px rgba(139, 92, 246, 0.15),
+            0 4px 12px rgba(0, 0, 0, 0.08);
+        border-color: rgba(139, 92, 246, 0.3);
+
+        &::before {
+            opacity: 1;
+        }
+    }
+
+    &.has-chapter {
+        border-color: rgba(139, 92, 246, 0.2);
+
+        &:hover {
+            box-shadow:
+                0 0 25px rgba(139, 92, 246, 0.15),
+                0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    &.loading {
+        .card-shimmer {
+            height: 100%;
+            background: linear-gradient(90deg,
+                    var(--card-border) 0%,
+                    var(--bg-secondary) 50%,
+                    var(--card-border) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+    }
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+
+    h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+
+        svg {
+            color: var(--marvel-primary);
+        }
+    }
+
+    .active-badge {
+        padding: 0.25rem 0.625rem;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(168, 85, 247, 0.1));
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--marvel-primary);
+    }
+}
+
+.card-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+// Active chapter preview
+.chapter-preview {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
+
+    .chapter-icon {
+        font-size: 2rem;
+        line-height: 1;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+
+    .chapter-info {
+        flex: 1;
+        min-width: 0;
+
+        .chapter-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.25rem 0;
+            line-height: 1.3;
+        }
+
+        .chapter-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .chapter-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.4;
+            font-style: italic;
+        }
+    }
+}
+
+// Empty state
+.empty-chapter-state {
+    text-align: center;
+    width: 100%;
+    padding: 0.5rem 0;
+
+    .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        opacity: 0.6;
+    }
+
+    .empty-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.375rem 0;
+    }
+
+    .empty-hint {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin: 0 0 0.25rem 0;
+        line-height: 1.4;
+    }
+
+    .empty-note {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin: 0;
+        font-style: italic;
+    }
+}
+
+.card-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 0.875rem;
+    border-top: 1px solid var(--card-border);
+    color: var(--marvel-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    svg {
+        transition: transform 0.3s ease;
+    }
+
+    .life-chapters-card:hover & svg {
+        transform: translateX(4px);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// Dark mode enhancements
+html.dark {
+    .life-chapters-card.has-chapter {
+        box-shadow:
+            0 0 15px rgba(139, 92, 246, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+}
+
+// Mobile responsive
+@media (max-width: 640px) {
+    .life-chapters-card {
+        min-height: 180px;
+        padding: 1rem;
+    }
+
+    .chapter-preview {
+        .chapter-icon {
+            font-size: 1.75rem;
+        }
+
+        .chapter-info {
+            .chapter-title {
+                font-size: 1rem;
+            }
+        }
+    }
+
+    .empty-chapter-state {
+        .empty-icon {
+            font-size: 2rem;
+        }
+    }
+}

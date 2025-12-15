@@ -9,23 +9,24 @@ import {
   Lock,
   Globe,
   ArrowRight,
-  Loader
+  Loader,
+  ArrowLeft
 } from 'lucide-react';
 import Navbar from '../../components/Navbar/Navbar.jsx';
 import PullToRefresh from '../../components/PullToRefresh/PullToRefresh.jsx';
 import PinModal from '../../components/PinModal/PinModal.jsx';
 import axiosInstance from '../../utils/axiosInstance';
-import { formatName } from '../../utils/helpers';
+import { truncateHtmlContent } from '../../utils/helpers';
 import './EntriesList.scss';
 
 const EntriesList = () => {
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [entries, setEntries] = useState([]);
   const [filteredEntries, setFilteredEntries] = useState([]);
   const [error, setError] = useState(null);
   const [username, setUsername] = useState('User');
+  const [userEmail, setUserEmail] = useState('');
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,6 +50,7 @@ const EntriesList = () => {
         const response = await axiosInstance.get('/auth/me');
         if (response.data && response.data.user) {
           setUsername(response.data.user.name || 'User');
+          setUserEmail(response.data.user.email || '');
         }
       } catch (err) {
         console.error('Failed to fetch user info:', err);
@@ -72,10 +74,8 @@ const EntriesList = () => {
       const newEntries = response.data.data || [];
 
       if (pageNum === 1) {
-        setEntries(newEntries);
         setFilteredEntries(newEntries);
       } else {
-        setEntries(prev => [...prev, ...newEntries]);
         setFilteredEntries(prev => [...prev, ...newEntries]);
       }
 
@@ -89,8 +89,10 @@ const EntriesList = () => {
   };
 
   useEffect(() => {
+    setFilteredEntries([]);
     fetchEntries(1);
     setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey, selectedMood, selectedTag, searchQuery]);
 
   const handleRefresh = async () => {
@@ -147,40 +149,6 @@ const EntriesList = () => {
     return [];
   };
 
-  const truncateText = (text, maxLength) => {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  };
-
-  // Convert markdown to HTML for display
-  const renderMarkdown = (text) => {
-    if (!text) return '';
-
-    let html = text;
-
-    // Bold: **text** -> <strong>text</strong>
-    html = html.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
-
-    // Italic: _text_ -> <em>text</em>
-    html = html.replace(/\_([^\_]+)\_/g, '<em>$1</em>');
-
-    // Inline code: `code` -> <code>code</code>
-    html = html.replace(/\`([^\`]+)\`/g, '<code>$1</code>');
-
-    // Headings: ### text -> text (remove prefixes for preview)
-    html = html.replace(/^#{1,6}\s+/gm, '');
-
-    // Lists: - item or 1. item -> item (remove prefixes)
-    html = html.replace(/^[\-\*]\s+/gm, '');
-    html = html.replace(/^\d+\.\s+/gm, '');
-
-    // Quotes: > text -> text (remove prefix)
-    html = html.replace(/^>\s+/gm, '');
-
-    return html;
-  };
-
   // Handle entry click - ALWAYS ask for PIN for private entries
   const handleEntryClick = (entry) => {
     if (entry.is_private === 0) {
@@ -204,7 +172,10 @@ const EntriesList = () => {
     }
   };
 
-  const userProfileInfo = { name: username };
+  const userProfileInfo = {
+    name: username,
+    email: userEmail,
+  };
 
   if (loading && page === 1) {
     return (
@@ -224,6 +195,15 @@ const EntriesList = () => {
       <PullToRefresh onRefresh={handleRefresh} />
 
       <div className="entries-container">
+        {/* Back Button */}
+        <button className="enhanced-back-btn" onClick={() => navigate('/dashboard')}>
+          <span className="back-btn-icon">
+            <ArrowLeft size={20} />
+          </span>
+          <span className="back-btn-text">Back to Dashboard</span>
+          <span className="back-btn-ripple"></span>
+        </button>
+
         {/* Header */}
         <div className="entries-header">
           <div className="header-title">
@@ -352,7 +332,7 @@ const EntriesList = () => {
                 ) : (
                   <>
                     <h3>{entry.title || 'Untitled Entry'}</h3>
-                    <p dangerouslySetInnerHTML={{ __html: renderMarkdown(truncateText(entry.body, 200)) }} />
+                    <p>{truncateHtmlContent(entry.body, 200)}</p>
                   </>
                 )}
               </div>

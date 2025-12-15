@@ -1,11 +1,12 @@
+import Cookies from 'js-cookie';
+import { Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Mail, Eye, EyeOff, Shield } from 'lucide-react';
-import Cookies from 'js-cookie';
-import axios from '../../utils/axiosInstance';
-import Navbar from '../../components/Navbar/Navbar';
-import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 import MarvelThemeSelector from '../../components/MarvelThemeSelector/MarvelThemeSelector';
+import Navbar from '../../components/Navbar/Navbar';
+import ScrollProgressBar from '../../components/ScrollProgressBar/ScrollProgressBar';
+import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
+import axios from '../../utils/axiosInstance';
 import './Login.scss';
 
 const Login = () => {
@@ -37,7 +38,7 @@ const Login = () => {
 
       if (response.data.token) {
         // Store access token in cookies (expires in 1 hour)
-        Cookies.set('accessToken', response.data.token, { expires: 1/24 });
+        Cookies.set('accessToken', response.data.token, { expires: 1 / 24 });
 
         // Store user data in localStorage for quick access
         if (response.data.user) {
@@ -57,6 +58,7 @@ const Login = () => {
   return (
     <>
       <Navbar showAuthButtons={false} />
+      <ScrollProgressBar />
       <div className="login-page">
         {/* Theme Toggle and Marvel Theme Selector positioned at top-right */}
         <div className="theme-toggle-container">

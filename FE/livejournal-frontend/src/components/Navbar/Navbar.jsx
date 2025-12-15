@@ -1,11 +1,12 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, LogOut, Settings as SettingsIcon } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
-import UserProfile from '../UserProfile/UserProfile';
-import ThemeToggle from '../ThemeToggle/ThemeToggle';
+import { BookOpen, LogOut, Settings as SettingsIcon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import MarvelThemeSelector from '../MarvelThemeSelector/MarvelThemeSelector';
 import Settings from '../Settings/Settings';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
+import UserProfile from '../UserProfile/UserProfile';
 import './Navbar.scss';
 
 const Navbar = ({ showAuthButtons = true, isAuthenticated = false, userProfileInfo = null }) => {
@@ -13,6 +14,7 @@ const Navbar = ({ showAuthButtons = true, isAuthenticated = false, userProfileIn
   const [isDark, setIsDark] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef(null);
+  const navRef = useRef(null); // added
 
   // Track theme changes
   useEffect(() => {
@@ -33,6 +35,19 @@ const Navbar = ({ showAuthButtons = true, isAuthenticated = false, userProfileIn
     return () => observer.disconnect();
   }, []);
 
+  // NEW: publish navbar height as CSS variable so pages can offset under fixed navbar
+  useEffect(() => {
+    const setOffset = () => {
+      const height = navRef.current ? navRef.current.offsetHeight : 76;
+      // add a small gap (12px) so content sits below navbar
+      document.documentElement.style.setProperty('--terms-navbar-offset', `${height + 12}px`);
+    };
+
+    setOffset();
+    window.addEventListener('resize', setOffset);
+    return () => window.removeEventListener('resize', setOffset);
+  }, []);
+
   // Close settings when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -46,6 +61,12 @@ const Navbar = ({ showAuthButtons = true, isAuthenticated = false, userProfileIn
   }, []);
 
   const handleLogout = () => {
+    // Save user info before clearing
+    const userInfo = userProfileInfo ? {
+      username: userProfileInfo.name,
+      email: userProfileInfo.email
+    } : null;
+
     // Clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -58,8 +79,8 @@ const Navbar = ({ showAuthButtons = true, isAuthenticated = false, userProfileIn
     sessionStorage.removeItem('privateUnlocked');
     sessionStorage.removeItem('privateUnlockedAt');
 
-    // Navigate to login page
-    navigate('/login', { replace: true });
+    // Navigate to logout feedback page with user info
+    navigate('/logout', { replace: true, state: { fromLogout: true, userInfo } });
   };
 
   const toggleSettings = () => {
@@ -67,7 +88,7 @@ const Navbar = ({ showAuthButtons = true, isAuthenticated = false, userProfileIn
   };
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" ref={navRef}>
       <div className="navbar-container">
         <Link to="/" className="navbar-brand">
           <div className={`logo-wrapper ${isDark ? 'dark-mode' : 'light-mode'}`}>
@@ -86,6 +107,7 @@ const Navbar = ({ showAuthButtons = true, isAuthenticated = false, userProfileIn
             <>
               <ThemeToggle />
               <MarvelThemeSelector />
+              <LanguageSelector />
             </>
           )}
 

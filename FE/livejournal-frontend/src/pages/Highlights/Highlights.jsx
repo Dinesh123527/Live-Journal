@@ -10,11 +10,12 @@ import {
   Globe,
   ArrowRight,
   Loader,
-  BookOpen
+  BookOpen,
+  ArrowLeft
 } from 'lucide-react';
 import Navbar from '../../components/Navbar/Navbar.jsx';
 import axiosInstance from '../../utils/axiosInstance';
-import { formatName } from '../../utils/helpers';
+import { truncateHtmlContent } from '../../utils/helpers';
 import './Highlights.scss';
 
 const Highlights = () => {
@@ -22,6 +23,7 @@ const Highlights = () => {
 
   // User info
   const [username, setUsername] = useState('User');
+  const [userEmail, setUserEmail] = useState('');
 
   // Data states
   const [loading, setLoading] = useState(true);
@@ -45,6 +47,7 @@ const Highlights = () => {
         // Set user info
         if (userResponse.data && userResponse.data.user) {
           setUsername(userResponse.data.user.name || 'User');
+          setUserEmail(userResponse.data.user.email || '');
         }
 
         // Set pinned entries
@@ -123,13 +126,10 @@ const Highlights = () => {
     return [];
   };
 
-  const truncateText = (text, maxLength) => {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+  const userProfileInfo = {
+    name: username,
+    email: userEmail,
   };
-
-  const userProfileInfo = { name: username };
 
   if (loading) {
     return (
@@ -148,6 +148,25 @@ const Highlights = () => {
       <Navbar isAuthenticated={true} userProfileInfo={userProfileInfo} />
 
       <div className="highlights-content">
+        {/* Pro-Level Animated Back Button */}
+        <button className="pro-back-btn" onClick={() => navigate('/dashboard')}>
+          <span className="back-btn-glow"></span>
+          <span className="back-btn-particles">
+            <span className="particle particle-1"></span>
+            <span className="particle particle-2"></span>
+            <span className="particle particle-3"></span>
+            <span className="particle particle-4"></span>
+          </span>
+          <span className="back-btn-icon-wrapper">
+            <ArrowLeft size={20} className="back-icon" />
+          </span>
+          <span className="back-btn-text-wrapper">
+            <span className="back-btn-text">Back to Dashboard</span>
+            <span className="back-btn-text-shadow">Back to Dashboard</span>
+          </span>
+          <span className="back-btn-shine"></span>
+        </button>
+
         {/* Header */}
         <div className="highlights-header">
           <div className="header-icon">
@@ -256,7 +275,7 @@ const Highlights = () => {
 
                   <div className="entry-content">
                     <h3>{entry.title || 'Untitled Entry'}</h3>
-                    <p className="entry-body">{truncateText(entry.body, 150)}</p>
+                    <p className="entry-body">{truncateHtmlContent(entry.body, 150)}</p>
                   </div>
 
                   <div className="entry-footer">
@@ -282,7 +301,10 @@ const Highlights = () => {
             </div>
           ) : (
             <div className="no-pinned-entries">
-              <Star size={64} className="empty-icon" />
+              <div className="date-info">
+                <p className="full-date">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                <p className="year">{new Date().getFullYear()}</p>
+              </div>
               <h3>No pinned entries yet</h3>
               <p>Pin your favorite entries to see them here</p>
               <button
@@ -362,4 +384,3 @@ const Highlights = () => {
 };
 
 export default Highlights;
-

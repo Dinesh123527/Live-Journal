@@ -1,26 +1,32 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  BookOpen,
-  Sparkles,
-  TrendingUp,
-  Calendar,
-  FileText,
-  Edit3,
-  Zap,
-  Award,
-  Star,
   ArrowRight,
+  Award,
+  Bell,
+  BookOpen,
+  Calendar,
+  Edit3,
+  FileText,
   Flame,
+  Globe,
+  Lightbulb,
   Lock,
-  Globe
+  Mic,
+  Package,
+  Sparkles,
+  Star,
+  TrendingUp,
+  X,
+  Zap
 } from 'lucide-react';
-import Cookies from 'js-cookie';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar.jsx';
-import PullToRefresh from '../../components/PullToRefresh/PullToRefresh.jsx';
 import PinModal from '../../components/PinModal/PinModal.jsx';
+import PullToRefresh from '../../components/PullToRefresh/PullToRefresh.jsx';
+import ScrollProgressBar from '../../components/ScrollProgressBar/ScrollProgressBar.jsx';
+import { useVapiJournal } from '../../hooks/useVapiJournal';
 import axiosInstance from '../../utils/axiosInstance';
-import { formatName } from '../../utils/helpers';
+import { formatName, truncateHtmlContent } from '../../utils/helpers';
 import './Dashboard.scss';
 
 const Dashboard = () => {
@@ -28,15 +34,12 @@ const Dashboard = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // PIN modal states
   const [showPinModal, setShowPinModal] = useState(false);
   const [pinModalMode, setPinModalMode] = useState('verify');
   const [pendingPrivateEntry, setPendingPrivateEntry] = useState(null);
   const [showPinSetupPrompt, setShowPinSetupPrompt] = useState(false);
-
-  // Dashboard data states
   const [username, setUsername] = useState('User');
+  const [userEmail, setUserEmail] = useState('');
   const [displayName, setDisplayName] = useState('User');
   const [streaks, setStreaks] = useState({ current_streak: 0, longest_streak: 0, last_written_date: null });
   const [latestDraft, setLatestDraft] = useState(null);
@@ -44,12 +47,40 @@ const Dashboard = () => {
   const [recentEntries, setRecentEntries] = useState([]);
   const [moodTrend, setMoodTrend] = useState([]);
   const [pinnedEntries, setPinnedEntries] = useState([]);
+  const [upcomingReminders, setUpcomingReminders] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [todayLearning, setTodayLearning] = useState(null);
+  const [hasLearningToday, setHasLearningToday] = useState(false);
+  const [learningStreak, setLearningStreak] = useState({ current_streak: 0, longest_streak: 0 });
+  const {
+    startRecording,
+    stopRecording,
+    isRecording,
+    transcript,
+    clearTranscript,
+    error: vapiError
+  } = useVapiJournal();
+  const [showAssistant, setShowAssistant] = useState(false);
+  const [assistantResponse, setAssistantResponse] = useState('');
 
-  // Fetch all dashboard data
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
+
+      const today = new Date();
+      const nextWeek = new Date(today);
+      nextWeek.setDate(today.getDate() + 7);
+
+      const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const fromDate = formatDate(today);
+      const toDate = formatDate(nextWeek);
 
       // Parallelize all API calls for better performance
       const [
@@ -59,7 +90,11 @@ const Dashboard = () => {
         todayResponse,
         entriesResponse,
         trendResponse,
-        pinnedResponse
+        pinnedResponse,
+        remindersResponse,
+        eventsResponse,
+        learningTodayResponse,
+        learningStreakResponse
       ] = await Promise.all([
         axiosInstance.get('/auth/me'),
         axiosInstance.get('/analytics/streaks'),
@@ -67,13 +102,19 @@ const Dashboard = () => {
         axiosInstance.get('/analytics/today'),
         axiosInstance.get('/entries?limit=5'),
         axiosInstance.get('/analytics/trend?range=7d'),
-        axiosInstance.get('/entries/pinned?limit=3')
+        axiosInstance.get('/entries/pinned?limit=3'),
+        axiosInstance.get('/reminders/upcoming?days=7'),
+        axiosInstance.get(`/events?from=${fromDate}&to=${toDate}`),
+        axiosInstance.get('/learning/today').catch(() => ({ data: { hasLearning: false, learning: null } })),
+        axiosInstance.get('/learning/streak').catch(() => ({ data: { current_streak: 0, longest_streak: 0 } }))
       ]);
 
       // Set user info
       if (userResponse.data && userResponse.data.user) {
         const userName = userResponse.data.user.name || 'User';
+        const email = userResponse.data.user.email || '';
         setUsername(userName);
+        setUserEmail(email);
         setDisplayName(formatName(userName, 25));
       }
 
@@ -105,6 +146,27 @@ const Dashboard = () => {
       // Set pinned entries
       if (pinnedResponse.data && pinnedResponse.data.data) {
         setPinnedEntries(pinnedResponse.data.data);
+      }
+
+      // Set upcoming reminders
+      if (remindersResponse.data && remindersResponse.data.reminders) {
+        setUpcomingReminders(remindersResponse.data.reminders);
+      }
+
+      // Set upcoming events
+      if (eventsResponse.data && eventsResponse.data.events) {
+        setUpcomingEvents(eventsResponse.data.events);
+      }
+
+      // Set today's learning data
+      if (learningTodayResponse.data) {
+        setTodayLearning(learningTodayResponse.data.learning);
+        setHasLearningToday(learningTodayResponse.data.hasLearning);
+      }
+
+      // Set learning streak
+      if (learningStreakResponse.data && learningStreakResponse.data.current_streak !== undefined) {
+        setLearningStreak(learningStreakResponse.data);
       }
 
     } catch (err) {
@@ -242,6 +304,88 @@ const Dashboard = () => {
   // Create user profile info object
   const userProfileInfo = {
     name: username,
+    email: userEmail,
+  };
+
+  // Parse voice commands for dashboard actions
+  useEffect(() => {
+    if (transcript && showAssistant) {
+      parseAssistantCommand(transcript);
+    }
+  }, [transcript, showAssistant]);
+
+  const parseAssistantCommand = (text) => {
+    const lowerText = text.toLowerCase();
+
+    // Navigation commands
+    if (lowerText.includes('create') && (lowerText.includes('entry') || lowerText.includes('journal'))) {
+      setAssistantResponse('Opening new entry editor...');
+      setTimeout(() => navigate('/dashboard/new-entry'), 1000);
+    } else if (lowerText.includes('voice journal') || lowerText.includes('voice entry')) {
+      setAssistantResponse('Starting voice journal...');
+      setTimeout(() => navigate('/dashboard/new-entry?mode=voice'), 1000);
+    } else if (lowerText.includes('search') || lowerText.includes('find entries')) {
+      setAssistantResponse('Opening search...');
+      setTimeout(() => navigate('/dashboard/search'), 1000);
+    } else if (lowerText.includes('calendar') || lowerText.includes('events')) {
+      setAssistantResponse('Opening calendar...');
+      setTimeout(() => navigate('/dashboard/calendar'), 1000);
+    } else if (lowerText.includes('highlights') || lowerText.includes('pinned')) {
+      setAssistantResponse('Opening highlights...');
+      setTimeout(() => navigate('/app/highlights'), 1000);
+    } else if (lowerText.includes('all entries') || lowerText.includes('view entries')) {
+      setAssistantResponse('Showing all entries...');
+      setTimeout(() => navigate('/dashboard/entries'), 1000);
+    }
+
+    // Information queries
+    else if (lowerText.includes('streak') || lowerText.includes('how many days')) {
+      setAssistantResponse(`Your current streak is ${streaks.current_streak} days! Keep it up! Your best streak is ${streaks.longest_streak} days.`);
+    } else if (lowerText.includes('mood today') || lowerText.includes('how am i feeling')) {
+      if (todayMood && todayMood.entry_count > 0) {
+        const moodScore = Math.round((todayMood.avg_mood_score || 0) * 100);
+        setAssistantResponse(`Your mood today is ${moodScore}% positive. You've written ${todayMood.entry_count} ${todayMood.entry_count === 1 ? 'entry' : 'entries'} today.`);
+      } else {
+        setAssistantResponse("You haven't recorded any mood today. Would you like to create an entry?");
+      }
+    } else if (lowerText.includes('recent entries') || lowerText.includes('latest')) {
+      if (recentEntries && recentEntries.length > 0) {
+        setAssistantResponse(`You have ${recentEntries.length} recent entries. Your latest entry is "${recentEntries[0].title || 'Untitled'}".`);
+      } else {
+        setAssistantResponse("You don't have any entries yet. Let's create your first one!");
+      }
+    } else if (lowerText.includes('draft')) {
+      if (latestDraft) {
+        setAssistantResponse(`You have a draft titled "${latestDraft.title || 'Untitled'}". Would you like to continue working on it?`);
+      } else {
+        setAssistantResponse("You don't have any drafts at the moment.");
+      }
+    } else if (lowerText.includes('reminders') || lowerText.includes('upcoming')) {
+      if (upcomingReminders && upcomingReminders.length > 0) {
+        setAssistantResponse(`You have ${upcomingReminders.length} upcoming ${upcomingReminders.length === 1 ? 'reminder' : 'reminders'}.`);
+      } else {
+        setAssistantResponse("You don't have any upcoming reminders.");
+      }
+    }
+
+    // Help command
+    else if (lowerText.includes('help') || lowerText.includes('what can you do')) {
+      setAssistantResponse('I can help you navigate your journal! Try saying: "Create new entry", "Show my streak", "What\'s my mood today", "Open search", "Go to calendar", or "Show highlights".');
+    }
+  };
+
+  const toggleAssistant = async () => {
+    if (showAssistant) {
+      stopRecording();
+      setShowAssistant(false);
+      setAssistantResponse('');
+      clearTranscript();
+    } else {
+      setShowAssistant(true);
+      setAssistantResponse('Hi! I\'m your AI journal assistant. How can I help you today?');
+      clearTranscript();
+      await startRecording();
+    }
   };
 
   if (loading) {
@@ -271,6 +415,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-page">
       <Navbar isAuthenticated={true} userProfileInfo={userProfileInfo} />
+      <ScrollProgressBar />
       <PullToRefresh onRefresh={handleRefresh} />
 
       <div className="dashboard-content">
@@ -307,11 +452,19 @@ const Dashboard = () => {
           </button>
           <button className="action-btn secondary" onClick={() => navigate('/dashboard/new-entry?mode=voice')}>
             <Zap size={20} />
-            <span>Start Voice Journal</span>
+            <span>Voice Journal</span>
           </button>
           <button className="action-btn tertiary" onClick={() => navigate('/dashboard/search')}>
             <Sparkles size={20} />
             <span>Search</span>
+          </button>
+          <button
+            className="action-btn time-capsule-btn"
+            onClick={() => navigate('/dashboard/time-capsule/new')}
+            title="Write something for your future self"
+          >
+            <Package size={20} />
+            <span>Time Capsule</span>
           </button>
         </div>
 
@@ -328,7 +481,7 @@ const Dashboard = () => {
             </div>
             <div className="draft-preview">
               <h4>{latestDraft.title || 'Untitled Draft'}</h4>
-              <p>{truncateText(latestDraft.body, 150)}</p>
+              <p>{truncateHtmlContent(latestDraft.body, 150)}</p>
             </div>
             <div className="draft-action">
               <span>Continue writing</span>
@@ -410,6 +563,180 @@ const Dashboard = () => {
                   <p className="hint">Write more entries to see your mood trend</p>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Calendar & Events Card */}
+          <div className="calendar-reminders-card" onClick={() => navigate('/calendar')}>
+            <div className="card-header">
+              <h3>
+                <Calendar size={20} />
+                Calendar & Events
+              </h3>
+            </div>
+            <div className="calendar-content">
+              {(upcomingReminders && upcomingReminders.length > 0) || (upcomingEvents && upcomingEvents.length > 0) ? (
+                <div className="calendar-items-container">
+                  {/* Show Events */}
+                  {upcomingEvents && upcomingEvents.length > 0 && (
+                    <div className="events-section">
+                      <div className="section-badge">
+                        <Calendar size={16} />
+                        <span className="badge-count">{upcomingEvents.length}</span>
+                      </div>
+                      <div className="items-list">
+                        {upcomingEvents.slice(0, 2).map((event, idx) => {
+                          // Parse the start_datetime from backend
+                          const eventDate = new Date(event.start_datetime);
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          const eventDateOnly = new Date(eventDate);
+                          eventDateOnly.setHours(0, 0, 0, 0);
+                          const tomorrow = new Date(today);
+                          tomorrow.setDate(tomorrow.getDate() + 1);
+
+                          const isToday = eventDateOnly.getTime() === today.getTime();
+                          const isTomorrow = eventDateOnly.getTime() === tomorrow.getTime();
+
+                          return (
+                            <div key={idx} className="calendar-item event-item">
+                              <div className="item-icon">
+                                <div className="date-badge">
+                                  <span className="day">{eventDate.getDate()}</span>
+                                  <span className="month">{eventDate.toLocaleDateString('en-US', { month: 'short' })}</span>
+                                </div>
+                              </div>
+                              <div className="item-content">
+                                <h4 className="item-title">{event.title}</h4>
+                                <p className="item-time">
+                                  {isToday ? '📍 Today' : isTomorrow ? '📍 Tomorrow' : `📍 ${eventDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`}
+                                  {!event.all_day && ` • ${eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}
+                                </p>
+                                {event.description && (
+                                  <p className="item-description">{truncateText(event.description, 60)}</p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {upcomingEvents.length > 2 && (
+                          <p className="more-items">+{upcomingEvents.length - 2} more {upcomingEvents.length - 2 === 1 ? 'event' : 'events'}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Show Reminders */}
+                  {upcomingReminders && upcomingReminders.length > 0 && (
+                    <div className="reminders-section">
+                      <div className="section-badge">
+                        <Bell size={16} />
+                        <span className="badge-count">{upcomingReminders.length}</span>
+                      </div>
+                      <div className="items-list">
+                        {upcomingReminders.slice(0, 2).map((reminder, idx) => {
+                          const reminderDate = new Date(reminder.remind_at);
+                          const isToday = reminderDate.toDateString() === new Date().toDateString();
+                          const isTomorrow = reminderDate.toDateString() === new Date(Date.now() + 86400000).toDateString();
+
+                          return (
+                            <div key={idx} className="calendar-item reminder-item">
+                              <div className="item-icon">
+                                <Bell size={18} className="bell-icon" />
+                              </div>
+                              <div className="item-content">
+                                <h4 className="item-title">{reminder.title}</h4>
+                                <p className="item-time">
+                                  🔔 {isToday ? 'Today' : isTomorrow ? 'Tomorrow' : reminderDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                  {' • ' + reminderDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {upcomingReminders.length > 2 && (
+                          <p className="more-items">+{upcomingReminders.length - 2} more {upcomingReminders.length - 2 === 1 ? 'reminder' : 'reminders'}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="no-calendar-data">
+                  <div className="date-info">
+                    <p className="full-date">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                    <p className="year">{new Date().getFullYear()}</p>
+                  </div>
+                  <p className="no-events-text">No upcoming events or reminders</p>
+                  <p className="hint">Tap to view calendar & create events</p>
+                </div>
+              )}
+            </div>
+            <div className="card-action">
+              <span>Open Calendar</span>
+              <ArrowRight size={18} />
+            </div>
+          </div>
+
+          {/* Learning Moment Card */}
+          <div className="learning-moment-card" onClick={() => navigate('/learning')}>
+            <div className="card-header">
+              <h3>
+                <Lightbulb size={20} />
+                Learning Moment
+              </h3>
+              {hasLearningToday && (
+                <span className="captured-badge">✓ Captured</span>
+              )}
+            </div>
+            <div className="learning-content">
+              {hasLearningToday && todayLearning ? (
+                <div className="learning-preview">
+                  <p className="learning-text">"{truncateText(todayLearning.text, 80)}"</p>
+                  <div className="learning-meta">
+                    {todayLearning.mood_label && (
+                      <span className="mood-indicator">{getMoodEmoji(todayLearning.mood_label)}</span>
+                    )}
+                    {learningStreak.current_streak > 0 && (
+                      <span className="streak-mini">
+                        <Flame size={14} />
+                        {learningStreak.current_streak} day streak
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="no-learning-data">
+                  <div className="prompt-icon">💡</div>
+                  <p className="prompt-text">What's one thing you learned today?</p>
+                  <p className="hint">Capture it in 1-2 lines</p>
+                </div>
+              )}
+            </div>
+            <div className="card-action">
+              <span>{hasLearningToday ? 'View Learnings' : 'Add Learning'}</span>
+              <ArrowRight size={18} />
+            </div>
+          </div>
+
+          {/* Life Chapters Card */}
+          <div className="life-chapters-card" onClick={() => navigate('/dashboard/life-chapters')}>
+            <div className="card-header">
+              <h3>
+                <BookOpen size={20} />
+                Life Chapters
+              </h3>
+            </div>
+            <div className="chapters-content">
+              <div className="no-chapters-data">
+                <div className="prompt-icon">📖</div>
+                <p className="prompt-text">Your life, in meaningful phases</p>
+                <p className="hint">Group moments into chapters</p>
+              </div>
+            </div>
+            <div className="card-action">
+              <span>View Chapters</span>
+              <ArrowRight size={18} />
             </div>
           </div>
         </div>
@@ -513,6 +840,7 @@ const Dashboard = () => {
           </div>
         )}
 
+
         {/* PIN Modal for private entries */}
         {showPinModal && (
           <PinModal
@@ -539,6 +867,18 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
+        {/* AI Journal Assistant Button */}
+        <div className="ai-assistant-container">
+          <button className="ai-assistant-btn" onClick={toggleAssistant}>
+            {showAssistant ? <X size={24} /> : <Mic size={24} />}
+          </button>
+          {showAssistant && (
+            <div className="ai-assistant-response">
+              <p>{assistantResponse}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

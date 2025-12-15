@@ -1,48 +1,77 @@
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { BookOpen, Sparkles, Lock, TrendingUp, Moon, Search } from 'lucide-react';
+import { BookOpen, Lock, Moon, Search, Sparkles, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar.jsx';
 import './Landing.scss';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      setScrollProgress(progress);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const features = [
     {
       icon: <Sparkles />,
-      title: 'AI-Powered',
-      description: 'Smart insights and mood analysis for your journal entries'
+      title: t('landing.features.aiPowered.title'),
+      description: t('landing.features.aiPowered.description')
     },
     {
       icon: <Lock />,
-      title: 'Secure & Private',
-      description: 'End-to-end encryption keeps your thoughts safe'
+      title: t('landing.features.secure.title'),
+      description: t('landing.features.secure.description')
     },
     {
       icon: <TrendingUp />,
-      title: 'Track Your Mood',
-      description: 'Visualize emotional patterns over time'
+      title: t('landing.features.mood.title'),
+      description: t('landing.features.mood.description')
     },
     {
       icon: <Moon />,
-      title: 'Beautiful Design',
-      description: 'Apple-inspired interface with dark mode'
+      title: t('landing.features.design.title'),
+      description: t('landing.features.design.description')
     },
     {
       icon: <Search />,
-      title: 'Powerful Search',
-      description: 'Find any entry instantly with smart search'
+      title: t('landing.features.search.title'),
+      description: t('landing.features.search.description')
     },
     {
       icon: <BookOpen />,
-      title: 'Auto-Save Drafts',
-      description: 'Never lose your thoughts with automatic drafts'
+      title: t('landing.features.drafts.title'),
+      description: t('landing.features.drafts.description')
     }
   ];
 
   return (
     <div className="landing-page">
       <Navbar isAuthenticated={false} />
+
+      <motion.div
+        className="landing-progress-container"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <motion.div
+          className="landing-progress-bar"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </motion.div>
 
       {/* Hero Section */}
       <section className="hero-section">
@@ -53,15 +82,13 @@ const Landing = () => {
             transition={{ duration: 0.8 }}
           >
             <h1>
-              Your Thoughts,
+              {t('landing.hero.title1')}
               <br />
-              Beautifully Captured
+              {t('landing.hero.title2')}
             </h1>
-            <p>
-              A modern journaling experience powered by AI. Track your mood, organize your thoughts, and discover insights about yourself.
-            </p>
+            <p>{t('landing.hero.description')}</p>
             <button className="cta-button" onClick={() => navigate('/login')}>
-              Start Journaling
+              {t('landing.hero.cta')}
             </button>
           </motion.div>
 
@@ -100,8 +127,8 @@ const Landing = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
-            <h2>Everything You Need</h2>
-            <p>Powerful features to help you journal better</p>
+            <h2>{t('landing.features.heading')}</h2>
+            <p>{t('landing.features.subheading')}</p>
           </motion.div>
         </div>
 
@@ -131,21 +158,21 @@ const Landing = () => {
           viewport={{ once: true }}
           className="cta-card"
         >
-          <h2>Ready to Start Your Journey?</h2>
-          <p>Join thousands of people who journal with us every day</p>
+          <h2>{t('landing.cta.heading')}</h2>
+          <p>{t('landing.cta.description')}</p>
           <button onClick={() => navigate('/signup')}>
-            Create Account
+            {t('landing.cta.button')}
           </button>
         </motion.div>
       </section>
 
       {/* Footer */}
       <footer>
-        <p>© 2025 Live Journal. Your thoughts, your privacy.</p>
+        <p>{t('landing.footer.copyright')}</p>
         <div className="footer-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
-          <a href="#">Contact</a>
+          <Link to="/privacy">{t('landing.footer.privacy')}</Link>
+          <Link to="/terms">{t('landing.footer.terms')}</Link>
+          <Link to="/contact">{t('landing.footer.contact')}</Link>
         </div>
       </footer>
     </div>
@@ -153,3 +180,4 @@ const Landing = () => {
 };
 
 export default Landing;
+

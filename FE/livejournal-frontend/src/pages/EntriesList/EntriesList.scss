@@ -31,6 +31,186 @@
     @media (max-width: 768px) {
       padding: 1.5rem 1rem;
     }
+
+    .enhanced-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1.5rem;
+      margin-bottom: 1.5rem;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 14px;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      animation: slideInFromLeft 0.6s ease-out;
+
+      // Light mode specific styling
+      [data-theme="light"] & {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: 2.5px solid #5568d3;
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+
+        &:hover {
+          border-color: #4c5cc7;
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+          transform: translateY(-3px) scale(1.02);
+          background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+        }
+
+        .back-btn-icon {
+          background: rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .back-btn-ripple {
+          background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+        }
+      }
+
+      // Dark mode specific styling
+      [data-theme="dark"] & {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+        border: 2.5px solid rgba(102, 126, 234, 0.6);
+        color: var(--marvel-primary);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.25), rgba(118, 75, 162, 0.25));
+          border-color: rgba(102, 126, 234, 0.9);
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+          transform: translateY(-3px) scale(1.02);
+          color: #8b9aee;
+        }
+
+        .back-btn-icon {
+          background: rgba(102, 126, 234, 0.2);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(102, 126, 234, 0.4);
+        }
+
+        .back-btn-ripple {
+          background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+        }
+      }
+
+      .back-btn-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+
+        svg {
+          transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+      }
+
+      .back-btn-text {
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        position: relative;
+        z-index: 2;
+        white-space: nowrap;
+      }
+
+      .back-btn-ripple {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        opacity: 0;
+        transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
+        z-index: 1;
+      }
+
+      &:hover {
+        .back-btn-icon {
+          transform: translateX(-4px) rotate(-5deg);
+
+          svg {
+            transform: translateX(-2px);
+          }
+        }
+
+        .back-btn-text {
+          transform: translateX(2px);
+        }
+      }
+
+      &:active {
+        transform: translateY(-1px) scale(0.98);
+
+        .back-btn-ripple {
+          width: 300px;
+          height: 300px;
+          opacity: 1;
+          transition: width 0s, height 0s, opacity 0.3s ease-out;
+        }
+      }
+
+      // Hover shine effect
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+        z-index: 1;
+      }
+
+      &:hover::before {
+        left: 100%;
+      }
+
+      // Pulsing glow animation
+      @keyframes pulseGlow {
+        0%, 100% {
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        50% {
+          box-shadow: 0 4px 25px rgba(102, 126, 234, 0.5);
+        }
+      }
+
+      &:focus {
+        outline: none;
+        animation: pulseGlow 1.5s ease-in-out infinite;
+      }
+
+      @media (max-width: 768px) {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+
+        .back-btn-icon {
+          width: 32px;
+          height: 32px;
+
+          svg {
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
   }
 
   .entries-header {
@@ -538,5 +718,25 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 25px rgba(102, 126, 234, 0.5);
   }
 }

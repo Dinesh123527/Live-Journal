@@ -4,6 +4,23 @@
   background: var(--landing-bg-gradient);
   transition: background 0.6s ease;
 
+  .landing-progress-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    z-index: 1001;
+    background: transparent;
+  }
+
+  .landing-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    border-radius: 0 2px 2px 0;
+  }
+
   .hero-section {
     padding: 8rem 1rem 5rem;
     text-align: center;
@@ -110,8 +127,8 @@
 
       .preview-card {
         background: var(--preview-bg, linear-gradient(135deg,
-          white 0%,
-          color-mix(in srgb, var(--marvel-primary, #667eea) 5%, white) 100%));
+              white 0%,
+              color-mix(in srgb, var(--marvel-primary, #667eea) 5%, white) 100%));
         border-radius: 1.5rem;
         box-shadow: 0 25px 50px -12px var(--marvel-glow, rgba(102, 126, 234, 0.25));
         padding: 2rem;
@@ -128,9 +145,17 @@
             height: 0.75rem;
             border-radius: 9999px;
 
-            &:nth-child(1) { background-color: #ef4444; }
-            &:nth-child(2) { background-color: #eab308; }
-            &:nth-child(3) { background-color: #22c55e; }
+            &:nth-child(1) {
+              background-color: #ef4444;
+            }
+
+            &:nth-child(2) {
+              background-color: #eab308;
+            }
+
+            &:nth-child(3) {
+              background-color: #22c55e;
+            }
           }
         }
 
@@ -144,13 +169,21 @@
             height: 1rem;
             border-radius: 0.25rem;
             background: linear-gradient(to right,
-              color-mix(in srgb, var(--marvel-primary, #667eea) 30%, white),
-              color-mix(in srgb, var(--marvel-accent, #a855f7) 25%, white));
+                color-mix(in srgb, var(--marvel-primary, #667eea) 30%, white),
+                color-mix(in srgb, var(--marvel-accent, #a855f7) 25%, white));
             transition: background 0.3s ease;
 
-            &:nth-child(1) { width: 75%; }
-            &:nth-child(2) { width: 100%; }
-            &:nth-child(3) { width: 85%; }
+            &:nth-child(1) {
+              width: 75%;
+            }
+
+            &:nth-child(2) {
+              width: 100%;
+            }
+
+            &:nth-child(3) {
+              width: 85%;
+            }
           }
 
           .ai-suggestion {
@@ -177,8 +210,8 @@
   .features-section {
     padding: 5rem 1rem;
     background: var(--section-bg, linear-gradient(135deg,
-      white 0%,
-      color-mix(in srgb, var(--marvel-primary, #667eea) 3%, white) 100%));
+          white 0%,
+          color-mix(in srgb, var(--marvel-primary, #667eea) 3%, white) 100%));
     width: 100%;
     transition: background 0.6s ease;
 
@@ -226,8 +259,8 @@
       .feature-card {
         padding: 2rem;
         background: var(--card-bg, linear-gradient(135deg,
-          white,
-          color-mix(in srgb, var(--marvel-primary, #667eea) 5%, white)));
+              white,
+              color-mix(in srgb, var(--marvel-primary, #667eea) 5%, white)));
         border-radius: 1rem;
         box-shadow: 0 10px 15px -3px var(--card-shadow, rgba(102, 126, 234, 0.1));
         border: 2px solid var(--card-border, color-mix(in srgb, var(--marvel-primary, #667eea) 15%, transparent));
@@ -238,8 +271,8 @@
           box-shadow: 0 20px 25px -5px var(--marvel-glow, rgba(102, 126, 234, 0.2));
           border-color: var(--marvel-primary, #667eea);
           background: var(--card-bg-hover, linear-gradient(135deg,
-            color-mix(in srgb, var(--marvel-primary, #667eea) 5%, white),
-            color-mix(in srgb, var(--marvel-accent, #a855f7) 8%, white)));
+                color-mix(in srgb, var(--marvel-primary, #667eea) 5%, white),
+                color-mix(in srgb, var(--marvel-accent, #a855f7) 8%, white)));
         }
 
         .feature-icon {
@@ -285,9 +318,9 @@
     padding: 5rem 1rem;
     width: 100%;
     background: var(--cta-bg, linear-gradient(135deg,
-      color-mix(in srgb, var(--marvel-primary, #667eea) 20%, white) 0%,
-      color-mix(in srgb, var(--marvel-secondary, #764ba2) 15%, white) 50%,
-      color-mix(in srgb, var(--marvel-accent, #a855f7) 20%, white) 100%));
+          color-mix(in srgb, var(--marvel-primary, #667eea) 20%, white) 0%,
+          color-mix(in srgb, var(--marvel-secondary, #764ba2) 15%, white) 50%,
+          color-mix(in srgb, var(--marvel-accent, #a855f7) 20%, white) 100%));
     transition: background 0.6s ease;
 
     @media (min-width: 768px) {
@@ -426,11 +459,11 @@ html.dark .landing-page {
       .cta-button {
         background: linear-gradient(135deg, var(--marvel-primary) 0%, var(--marvel-secondary) 50%, var(--marvel-accent) 100%);
         box-shadow: 0 10px 25px -5px rgba(129, 140, 248, 0.4),
-                    0 8px 10px -6px rgba(167, 139, 250, 0.3);
+          0 8px 10px -6px rgba(167, 139, 250, 0.3);
 
         &:hover {
           box-shadow: 0 20px 40px -5px rgba(129, 140, 248, 0.5),
-                      0 12px 20px -6px rgba(167, 139, 250, 0.4);
+            0 12px 20px -6px rgba(167, 139, 250, 0.4);
         }
       }
     }
@@ -438,16 +471,16 @@ html.dark .landing-page {
     .hero-preview {
       .preview-card {
         background: linear-gradient(135deg,
-          rgba(17, 24, 39, 0.95) 0%,
-          rgba(31, 41, 55, 0.9) 100%);
+            rgba(17, 24, 39, 0.95) 0%,
+            rgba(31, 41, 55, 0.9) 100%);
         border-color: rgba(129, 140, 248, 0.3);
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 
         .preview-content {
           .line {
             background: linear-gradient(to right,
-              rgba(129, 140, 248, 0.4),
-              rgba(192, 132, 252, 0.3));
+                rgba(129, 140, 248, 0.4),
+                rgba(192, 132, 252, 0.3));
           }
 
           .ai-suggestion {
@@ -464,8 +497,8 @@ html.dark .landing-page {
 
   .features-section {
     background: linear-gradient(135deg,
-      rgba(15, 23, 42, 0.5) 0%,
-      rgba(30, 27, 75, 0.4) 100%);
+        rgba(15, 23, 42, 0.5) 0%,
+        rgba(30, 27, 75, 0.4) 100%);
 
     .features-header {
       h2 {
@@ -480,8 +513,8 @@ html.dark .landing-page {
     .features-grid {
       .feature-card {
         background: linear-gradient(135deg,
-          rgba(31, 41, 55, 0.9),
-          rgba(55, 65, 81, 0.8));
+            rgba(31, 41, 55, 0.9),
+            rgba(55, 65, 81, 0.8));
         border-color: rgba(129, 140, 248, 0.2);
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
 
@@ -489,8 +522,8 @@ html.dark .landing-page {
           border-color: var(--marvel-primary);
           box-shadow: 0 20px 25px -5px rgba(129, 140, 248, 0.3);
           background: linear-gradient(135deg,
-            rgba(55, 65, 81, 0.9),
-            rgba(75, 85, 99, 0.8));
+              rgba(55, 65, 81, 0.9),
+              rgba(75, 85, 99, 0.8));
         }
 
         .feature-icon {
@@ -511,9 +544,9 @@ html.dark .landing-page {
 
   .cta-section {
     background: linear-gradient(135deg,
-      rgba(30, 27, 75, 0.4) 0%,
-      rgba(49, 46, 129, 0.3) 50%,
-      rgba(88, 28, 135, 0.3) 100%);
+        rgba(30, 27, 75, 0.4) 0%,
+        rgba(49, 46, 129, 0.3) 50%,
+        rgba(88, 28, 135, 0.3) 100%);
 
     .cta-card {
       background: linear-gradient(135deg, var(--marvel-primary) 0%, var(--marvel-secondary) 50%, var(--marvel-accent) 100%);
@@ -561,16 +594,37 @@ html.dark .landing-page {
 
 // Animations
 @keyframes shimmer {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 @keyframes button-glow {
-  0%, 100% { box-shadow: 0 20px 40px -5px var(--marvel-glow, rgba(102, 126, 234, 0.5)); }
-  50% { box-shadow: 0 20px 40px -5px var(--marvel-glow, rgba(102, 126, 234, 0.7)); }
+
+  0%,
+  100% {
+    box-shadow: 0 20px 40px -5px var(--marvel-glow, rgba(102, 126, 234, 0.5));
+  }
+
+  50% {
+    box-shadow: 0 20px 40px -5px var(--marvel-glow, rgba(102, 126, 234, 0.7));
+  }
 }

@@ -421,6 +421,14 @@ async function detectHabits(userId, lookbackDays = 90) {
 async function generateWelcomeGreeting(userName, isNewUser = false, userId = null) {
   const name = userName || 'there';
 
+  // Get time-based greeting
+  const hour = new Date().getHours();
+  let timeGreeting = 'Hello';
+  if (hour >= 5 && hour < 12) timeGreeting = 'Good morning';
+  else if (hour >= 12 && hour < 17) timeGreeting = 'Good afternoon';
+  else if (hour >= 17 && hour < 22) timeGreeting = 'Good evening';
+  else timeGreeting = 'Good night';
+
   // If AI is enabled, generate personalized greeting
   if (INSIGHT_MODEL) {
     try {
@@ -443,22 +451,24 @@ async function generateWelcomeGreeting(userName, isNewUser = false, userId = nul
       }
 
       const prompt = isNewUser
-        ? `Write a warm, encouraging welcome message (2-3 sentences, max 150 characters) for a new journaling app user named ${name}. Make it friendly, supportive, and mention the journey of self-discovery ahead.`
-        : `Write a warm, personalized greeting (2-3 sentences, max 150 characters) for returning user ${name} in a journaling app.${context} Be encouraging and supportive.`;
+        ? `Write a warm, encouraging welcome message (2-3 sentences, max 150 characters) for a new journaling app user. Start with "${timeGreeting}, ${name}!" and make it friendly, supportive, and mention the journey of self-discovery ahead.`
+        : `Write a warm, personalized greeting (2-3 sentences, max 150 characters) for returning user. Start with "${timeGreeting}, ${name}!" and be encouraging about their journaling journey.${context}`;
 
       const greeting = await generateTextWithModel(prompt, 150);
-      if (greeting) return greeting.trim();
+      if (greeting) {
+        // Ensure the greeting starts with the time-based greeting
+        const trimmed = greeting.trim();
+        if (!trimmed.toLowerCase().startsWith(timeGreeting.toLowerCase())) {
+          return `${timeGreeting}, ${name}! ${trimmed}`;
+        }
+        return trimmed;
+      }
     } catch (err) {
       console.warn('[ai.generateWelcomeGreeting] AI generation failed, using fallback', err.message);
     }
   }
 
   // Fallback greetings based on time of day and user status
-  const hour = new Date().getHours();
-  let timeGreeting = 'Hello';
-  if (hour < 12) timeGreeting = 'Good morning';
-  else if (hour < 18) timeGreeting = 'Good afternoon';
-  else timeGreeting = 'Good evening';
 
   if (isNewUser) {
     const newUserGreetings = [

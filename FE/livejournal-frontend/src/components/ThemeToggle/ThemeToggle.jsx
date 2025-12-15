@@ -4,18 +4,34 @@ import './ThemeToggle.scss';
 
 const ThemeToggle = ({ disabled = false }) => {
   const [showPanel, setShowPanel] = useState(false);
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'system';
+  });
   const panelRef = useRef(null);
 
-  // Load theme from localStorage
+  const applyTheme = (selectedTheme) => {
+    if (selectedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (selectedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else if (selectedTheme === 'system') {
+      // Use system preference
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  };
+
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'system';
-    setTheme(savedTheme);
     applyTheme(savedTheme);
 
     // Listen for system theme changes when in system mode
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemThemeChange = (e) => {
+    const handleSystemThemeChange = () => {
       const currentTheme = localStorage.getItem('theme') || 'system';
       if (currentTheme === 'system') {
         applyTheme('system');
@@ -45,22 +61,6 @@ const ThemeToggle = ({ disabled = false }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showPanel]);
-
-  const applyTheme = (selectedTheme) => {
-    if (selectedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else if (selectedTheme === 'light') {
-      document.documentElement.classList.remove('dark');
-    } else if (selectedTheme === 'system') {
-      // Use system preference
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
-  };
 
   const handleThemeChange = (selectedTheme) => {
     setTheme(selectedTheme);

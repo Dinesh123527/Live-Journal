@@ -32,3 +32,5 @@ async function authenticateToken(req, res, next) {
 }
 
 module.exports = authenticateToken;
+module.exports.requireAuth = authenticateToken;
+module.exports.authenticateToken = authenticateToken;

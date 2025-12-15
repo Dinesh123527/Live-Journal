@@ -1,0 +1,104 @@
+{
+  "navbar": {
+    "brand": "Live Journal",
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "logout": "Cerrar sesión"
+  },
+  "landing": {
+    "hero": {
+      "title1": "Tus Pensamientos,",
+      "title2": "Bellamente Capturados",
+      "description": "Una experiencia de diario moderna impulsada por IA. Rastrea tu estado de ánimo, organiza tus pensamientos y descubre información sobre ti mismo.",
+      "cta": "Comenzar a Escribir"
+    },
+    "features": {
+      "heading": "Todo lo que Necesitas",
+      "subheading": "Funciones potentes para ayudarte a escribir mejor",
+      "aiPowered": {
+        "title": "Con IA",
+        "description": "Información inteligente y análisis de estado de ánimo para tus entradas"
+      },
+      "secure": {
+        "title": "Seguro y Privado",
+        "description": "El cifrado de extremo a extremo mantiene tus pensamientos seguros"
+      },
+      "mood": {
+        "title": "Rastrea tu Estado de Ánimo",
+        "description": "Visualiza patrones emocionales a lo largo del tiempo"
+      },
+      "design": {
+        "title": "Diseño Hermoso",
+        "description": "Interfaz inspirada en Apple con modo oscuro"
+      },
+      "search": {
+        "title": "Búsqueda Potente",
+        "description": "Encuentra cualquier entrada al instante con búsqueda inteligente"
+      },
+      "drafts": {
+        "title": "Guardado Automático",
+        "description": "Nunca pierdas tus pensamientos con borradores automáticos"
+      }
+    },
+    "cta": {
+      "heading": "¿Listo para Comenzar tu Viaje?",
+      "description": "Únete a miles de personas que escriben con nosotros cada día",
+      "button": "Crear Cuenta"
+    },
+    "footer": {
+      "copyright": "© 2025 Live Journal. Tus pensamientos, tu privacidad.",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos de Servicio",
+      "contact": "Contacto"
+    }
+  },
+  "login": {
+    "title": "Bienvenido de Nuevo",
+    "subtitle": "Inicia sesión para continuar tu viaje",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "rememberMe": "Recuérdame",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "submit": "Iniciar Sesión",
+    "noAccount": "¿No tienes una cuenta?",
+    "signUp": "Regístrate"
+  },
+  "signup": {
+    "title": "Comienza tu Viaje",
+    "subtitle": "Crea tu cuenta y comienza a escribir",
+    "name": "Nombre Completo",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "submit": "Crear Cuenta",
+    "hasAccount": "¿Ya tienes una cuenta?",
+    "signIn": "Iniciar sesión"
+  },
+  "terms": {
+    "title": "Términos de Servicio",
+    "lastUpdated": "Última actualización"
+  },
+  "privacy": {
+    "title": "Política de Privacidad",
+    "lastUpdated": "Última actualización"
+  },
+  "contact": {
+    "title": "Contáctanos",
+    "subtitle": "Nos encantaría saber de ti",
+    "name": "Tu Nombre",
+    "email": "Tu Correo",
+    "message": "Mensaje",
+    "submit": "Enviar Mensaje"
+  },
+  "language": {
+    "select": "Seleccionar Idioma",
+    "en": "Inglés",
+    "es": "Español",
+    "fr": "Francés",
+    "de": "Alemán",
+    "hi": "Hindi",
+    "zh": "Chino",
+    "ja": "Japonés",
+    "ar": "Árabe"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "navbar": {
+    "brand": "Live Journal",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout"
+  },
+  "landing": {
+    "hero": {
+      "title1": "Your Thoughts,",
+      "title2": "Beautifully Captured",
+      "description": "A modern journaling experience powered by AI. Track your mood, organize your thoughts, and discover insights about yourself.",
+      "cta": "Start Journaling"
+    },
+    "features": {
+      "heading": "Everything You Need",
+      "subheading": "Powerful features to help you journal better",
+      "aiPowered": {
+        "title": "AI-Powered",
+        "description": "Smart insights and mood analysis for your journal entries"
+      },
+      "secure": {
+        "title": "Secure & Private",
+        "description": "End-to-end encryption keeps your thoughts safe"
+      },
+      "mood": {
+        "title": "Track Your Mood",
+        "description": "Visualize emotional patterns over time"
+      },
+      "design": {
+        "title": "Beautiful Design",
+        "description": "Apple-inspired interface with dark mode"
+      },
+      "search": {
+        "title": "Powerful Search",
+        "description": "Find any entry instantly with smart search"
+      },
+      "drafts": {
+        "title": "Auto-Save Drafts",
+        "description": "Never lose your thoughts with automatic drafts"
+      }
+    },
+    "cta": {
+      "heading": "Ready to Start Your Journey?",
+      "description": "Join thousands of people who journal with us every day",
+      "button": "Create Account"
+    },
+    "footer": {
+      "copyright": "© 2025 Live Journal. Your thoughts, your privacy.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact"
+    }
+  },
+  "login": {
+    "title": "Welcome Back",
+    "subtitle": "Sign in to continue your journey",
+    "email": "Email",
+    "password": "Password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "submit": "Sign In",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up"
+  },
+  "signup": {
+    "title": "Start Your Journey",
+    "subtitle": "Create your account and begin journaling",
+    "name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "submit": "Create Account",
+    "hasAccount": "Already have an account?",
+    "signIn": "Sign in"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We'd love to hear from you",
+    "name": "Your Name",
+    "email": "Your Email",
+    "message": "Message",
+    "submit": "Send Message"
+  },
+  "language": {
+    "select": "Select Language",
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French",
+    "de": "German",
+    "hi": "Hindi",
+    "zh": "Chinese",
+    "ja": "Japanese",
+    "ar": "Arabic"
+  }
+}
