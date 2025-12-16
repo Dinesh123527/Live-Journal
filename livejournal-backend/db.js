@@ -288,9 +288,66 @@ async function init() {
         INDEX (start_date),
         INDEX (end_date)
       );
+
+      CREATE TABLE IF NOT EXISTS letters (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        title VARCHAR(255) NULL,
+        body TEXT NOT NULL,
+        recipient ENUM('past', 'future', 'present') DEFAULT 'future',
+        unlock_type ENUM('date', 'life_event', 'immediate') DEFAULT 'date',
+        unlock_at DATETIME NULL,
+        life_event VARCHAR(50) NULL,
+        is_opened TINYINT(1) DEFAULT 0,
+        opened_at DATETIME NULL,
+        tags JSON NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX (user_id),
+        INDEX (unlock_type),
+        INDEX (unlock_at),
+        INDEX (life_event),
+        INDEX (is_opened)
+      );
     `;
 
     await tmpConn.query(createTables);
+
+    // Run migrations to update existing tables
+    try {
+      // Add 'present' to recipient ENUM and 'immediate' to unlock_type ENUM
+      await tmpConn.query(`
+        ALTER TABLE letters 
+        MODIFY COLUMN recipient ENUM('past', 'future', 'present') DEFAULT 'future',
+        MODIFY COLUMN unlock_type ENUM('date', 'life_event', 'immediate') DEFAULT 'date'
+      `);
+      console.log("✅ Letters table schema updated");
+    } catch (migrationErr) {
+      // Ignore if columns are already updated
+      if (migrationErr.code !== 'ER_DUP_ENTRY') {
+        console.log("Migration note:", migrationErr.message);
+      }
+    }
+
+    // Add reset token columns to users table for password reset
+    try {
+      // Check if reset_token column exists
+      const [columns] = await tmpConn.query(`
+        SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'reset_token'
+      `, [DB_NAME]);
+
+      if (columns.length === 0) {
+        await tmpConn.query(`ALTER TABLE users ADD COLUMN reset_token VARCHAR(255) NULL`);
+        await tmpConn.query(`ALTER TABLE users ADD COLUMN reset_token_expires DATETIME NULL`);
+        console.log("✅ Users table reset token columns added");
+      } else {
+        console.log("✅ Users table reset token columns already exist");
+      }
+    } catch (migrationErr) {
+      console.log("Reset token migration note:", migrationErr.message);
+    }
 
     await tmpConn.end();
 

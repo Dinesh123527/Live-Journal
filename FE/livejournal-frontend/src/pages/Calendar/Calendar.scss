@@ -463,6 +463,7 @@
             font-size: 1.1rem;
           }
         }
+
         .event-item,
         .reminder-item {
           display: flex;
@@ -495,12 +496,29 @@
             opacity: 1;
           }
 
-          &:nth-child(2) { animation-delay: 0.05s; }
-          &:nth-child(3) { animation-delay: 0.1s; }
-          &:nth-child(4) { animation-delay: 0.15s; }
-          &:nth-child(5) { animation-delay: 0.2s; }
-          &:nth-child(6) { animation-delay: 0.25s; }
-          &:nth-child(7) { animation-delay: 0.3s; }
+          &:nth-child(2) {
+            animation-delay: 0.05s;
+          }
+
+          &:nth-child(3) {
+            animation-delay: 0.1s;
+          }
+
+          &:nth-child(4) {
+            animation-delay: 0.15s;
+          }
+
+          &:nth-child(5) {
+            animation-delay: 0.2s;
+          }
+
+          &:nth-child(6) {
+            animation-delay: 0.25s;
+          }
+
+          &:nth-child(7) {
+            animation-delay: 0.3s;
+          }
 
           &:hover {
             border-color: var(--marvel-primary);
@@ -1339,7 +1357,7 @@
             input[type="checkbox"] {
               display: none;
 
-              &:checked + .toggle-label {
+              &:checked+.toggle-label {
                 .toggle-switch {
                   background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
                   border-color: var(--marvel-primary);
@@ -1774,15 +1792,20 @@
               height: 300px;
             }
 
-            &.cancel-btn {
-              background: var(--card-hover-bg);
-              color: var(--text-primary);
-              border: 2px solid var(--card-border);
+            &.event-cancel-btn {
+              background: linear-gradient(135deg, #4b5563, #6b7280);
+              color: white;
+              border: none !important;
+              box-shadow: 0 4px 12px rgba(75, 85, 99, 0.3);
+              height: fit-content;
 
               &:hover {
-                background: var(--card-bg);
-                border-color: var(--text-secondary);
                 transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(75, 85, 99, 0.4);
+              }
+
+              &:active {
+                transform: translateY(0);
               }
             }
 
@@ -1791,13 +1814,19 @@
               color: white;
               box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 
-              &:hover {
+              &:hover:not(:disabled) {
                 transform: translateY(-2px);
                 box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
               }
 
-              &:active {
+              &:active:not(:disabled) {
                 transform: translateY(0);
+              }
+
+              &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                box-shadow: none;
               }
             }
           }
@@ -1809,25 +1838,35 @@
 
 // Animations
 @keyframes bell-ring {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: rotate(0deg);
   }
-  10%, 30% {
+
+  10%,
+  30% {
     transform: rotate(-10deg);
   }
-  20%, 40% {
+
+  20%,
+  40% {
     transform: rotate(10deg);
   }
+
   50% {
     transform: rotate(0deg);
   }
 }
 
 @keyframes pulse-dot {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.5;
     transform: scale(1.2);
@@ -1835,19 +1874,25 @@
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-5px);
   }
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.1);
     opacity: 0.8;
@@ -1858,6 +1903,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1868,6 +1914,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1879,6 +1926,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1890,6 +1938,7 @@
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -1901,6 +1950,7 @@
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -1911,15 +1961,19 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
 
 @keyframes bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -2205,4 +2259,3 @@
     }
   }
 }
-

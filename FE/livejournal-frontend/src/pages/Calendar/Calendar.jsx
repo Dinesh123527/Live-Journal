@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { ArrowLeft, Bell, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, FileText, Globe, Plus, Trash2, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Plus, X, Clock, Bell, Calendar as CalendarIcon, ArrowLeft, Trash2, FileText, Globe } from 'lucide-react';
-import Navbar from '../../components/Navbar/Navbar.jsx';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal.jsx';
-import axiosInstance from '../../utils/axiosInstance';
-import { getHolidaysForMonth, getHolidayForDate } from '../../utils/holidays';
+import Navbar from '../../components/Navbar/Navbar.jsx';
 import ScrollProgressBar from '../../components/ScrollProgressBar/ScrollProgressBar.jsx';
+import axiosInstance from '../../utils/axiosInstance';
+import { getHolidayForDate, getHolidaysForMonth } from '../../utils/holidays';
 import './Calendar.scss';
 
 const Calendar = () => {
@@ -29,7 +29,7 @@ const Calendar = () => {
   const [confirmConfig, setConfirmConfig] = useState({
     title: '',
     message: '',
-    onConfirm: () => {},
+    onConfirm: () => { },
     type: 'danger'
   });
 
@@ -500,13 +500,12 @@ const Calendar = () => {
                 return (
                   <div
                     key={index}
-                    className={`calendar-day ${!day ? 'empty' : ''} ${
-                      day && day === selectedDate.getDate() &&
+                    className={`calendar-day ${!day ? 'empty' : ''} ${day && day === selectedDate.getDate() &&
                       currentDate.getMonth() === selectedDate.getMonth() &&
                       currentDate.getFullYear() === selectedDate.getFullYear()
-                        ? 'selected'
-                        : ''
-                    } ${day && hasEventsOnDay(day) ? 'has-events' : ''} ${hasHoliday ? 'has-holiday' : ''}`}
+                      ? 'selected'
+                      : ''
+                      } ${day && hasEventsOnDay(day) ? 'has-events' : ''} ${hasHoliday ? 'has-holiday' : ''}`}
                     onClick={() => handleDayClick(day)}
                     title={hasHoliday ? holidays.map(h => `${h.emoji} ${h.name}`).join(', ') : ''}
                   >
@@ -790,10 +789,10 @@ const Calendar = () => {
                 </div>
               </div>
               <div className="modal-actions">
-                <button type="button" onClick={() => setShowEventModal(false)} className="cancel-btn">
+                <button type="button" onClick={() => setShowEventModal(false)} className="event-cancel-btn">
                   Cancel
                 </button>
-                <button type="submit" className="submit-btn">
+                <button type="submit" className="submit-btn" disabled={!eventForm.title.trim()}>
                   Create Event
                 </button>
               </div>
@@ -911,10 +910,10 @@ const Calendar = () => {
               </div>
 
               <div className="modal-actions">
-                <button type="button" onClick={() => setShowReminderModal(false)} className="cancel-btn">
+                <button type="button" onClick={() => setShowReminderModal(false)} className="event-cancel-btn">
                   Cancel
                 </button>
-                <button type="submit" className="submit-btn">
+                <button type="submit" className="submit-btn" disabled={!reminderForm.title.trim()}>
                   Create Reminder
                 </button>
               </div>

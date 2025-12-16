@@ -18,6 +18,7 @@ const learningRoutes = require('./routes/learning');
 const feedbackRoutes = require('./routes/feedback');
 const timeCapsuleRoutes = require('./routes/timeCapsule');
 const lifeChapterRoutes = require('./routes/lifeChapter');
+const lettersRoutes = require('./routes/letters');
 
 const cleanup = require('./jobs/cleanupDrafts');
 const moodAggregator = require('./jobs/moodAggregator');
@@ -56,6 +57,7 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/time-capsule', timeCapsuleRoutes);
 app.use('/api/life-chapters', lifeChapterRoutes);
+app.use('/api/letters', lettersRoutes);
 
 cleanup.start();
 moodAggregator.start();

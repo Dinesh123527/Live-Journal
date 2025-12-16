@@ -9,13 +9,17 @@ import Dashboard from './pages/Dasboard/Dashboard.jsx';
 import EntriesList from './pages/EntriesList/EntriesList.jsx';
 import EntryDetail from './pages/EntryDetail/EntryDetail.jsx';
 import EntryEditor from './pages/EntryEditor/EntryEditor.jsx';
+import ForgotPassword from './pages/ForgotPassword/ForgotPassword.jsx';
 import Highlights from './pages/Highlights/Highlights.jsx';
 import Landing from './pages/Landing/Landing.jsx';
 import Learning from './pages/Learning/Learning.jsx';
+import LetterToMyself from './pages/LetterToMyself/LetterToMyself.jsx';
+import LettersList from './pages/LettersList/LettersList.jsx';
 import LifeChapters from './pages/LifeChapters/LifeChapters.jsx';
 import Login from './pages/Login/Login.jsx';
 import Logout from './pages/Logout/Logout.jsx';
 import Privacy from './pages/Privacy/Privacy.jsx';
+import ResetPassword from './pages/ResetPassword/ResetPassword.jsx';
 import Search from './pages/Search/Search.jsx';
 import Signup from './pages/Signup/Signup.jsx';
 import Terms from './pages/Terms/Terms.jsx';
@@ -35,6 +39,8 @@ function AnimatedRoutes() {
         <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/logout" element={<PageTransition><Logout /></PageTransition>} />
         <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
+        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+        <Route path="/reset-password/:token" element={<PageTransition><ResetPassword /></PageTransition>} />
         <Route path="/unauthorized" element={<PageTransition><Unauthorized /></PageTransition>} />
         <Route
           path="/welcome"
@@ -155,6 +161,22 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <PageTransition><LifeChapters /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/letter/new"
+          element={
+            <ProtectedRoute>
+              <PageTransition><LetterToMyself /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/letters"
+          element={
+            <ProtectedRoute>
+              <PageTransition><LettersList /></PageTransition>
             </ProtectedRoute>
           }
         />

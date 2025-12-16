@@ -1,14 +1,13 @@
-import { Calendar, Lock, Package, X } from 'lucide-react';
+import { Calendar, Gift, Lock, Mail, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import './SealedCapsuleModal.scss';
+import './SealedLetterModal.scss';
 
-const SealedCapsuleModal = ({ isOpen, onClose, capsule }) => {
+const SealedLetterModal = ({ isOpen, onClose, letter }) => {
     const [timeRemaining, setTimeRemaining] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 });
 
-    // Calculate time remaining with days, hours, minutes, seconds
     const calculateTimeRemaining = () => {
-        if (!capsule?.unlock_at) return { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 };
-        const unlockDate = new Date(capsule.unlock_at);
+        if (!letter?.unlock_at) return { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 };
+        const unlockDate = new Date(letter.unlock_at);
         const now = new Date();
         const diffTime = unlockDate - now;
 
@@ -29,9 +28,7 @@ const SealedCapsuleModal = ({ isOpen, onClose, capsule }) => {
         if (isOpen) {
             document.addEventListener('keydown', handleEscape);
             document.body.style.overflow = 'hidden';
-            // Initial calculation
             setTimeRemaining(calculateTimeRemaining());
-            // Update every second
             const interval = setInterval(() => {
                 setTimeRemaining(calculateTimeRemaining());
             }, 1000);
@@ -45,14 +42,14 @@ const SealedCapsuleModal = ({ isOpen, onClose, capsule }) => {
             document.removeEventListener('keydown', handleEscape);
             document.body.style.overflow = '';
         };
-    }, [isOpen, onClose, capsule]);
+    }, [isOpen, onClose, letter]);
 
-    if (!isOpen) return null;
+    if (!isOpen || !letter) return null;
 
     // Format unlock date
     const formatUnlockDate = () => {
-        if (!capsule?.unlock_at) return '';
-        const date = new Date(capsule.unlock_at);
+        if (!letter?.unlock_at) return '';
+        const date = new Date(letter.unlock_at);
         return date.toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
@@ -62,16 +59,29 @@ const SealedCapsuleModal = ({ isOpen, onClose, capsule }) => {
         });
     };
 
+    // Get life event info
+    const getLifeEventInfo = (event) => {
+        const events = {
+            'birthday': { icon: '🎂', label: 'Your Birthday' },
+            'new_year': { icon: '🎆', label: 'New Year' },
+            'graduation': { icon: '🎓', label: 'Graduation' },
+            'got_job': { icon: '💼', label: 'Getting a Job' },
+            'moved_city': { icon: '🏠', label: 'Moving City' },
+            'got_married': { icon: '💒', label: 'Getting Married' },
+            'had_baby': { icon: '👶', label: 'Having a Baby' },
+            'milestone_entries': { icon: '📚', label: 'Entry Milestone' }
+        };
+        return events[event] || { icon: '🎁', label: event };
+    };
+
     const { days, hours, minutes, seconds, total } = timeRemaining;
-    const isReady = total <= 0;
+    const isDateBased = letter.unlock_type === 'date';
 
     return (
-        <div className="sealed-modal-overlay" onClick={onClose}>
-            <div className="sealed-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="sealed-letter-overlay" onClick={onClose}>
+            <div className="sealed-letter-modal" onClick={(e) => e.stopPropagation()}>
                 {/* Floating particles */}
                 <div className="floating-particles">
-                    <div className="particle"></div>
-                    <div className="particle"></div>
                     <div className="particle"></div>
                     <div className="particle"></div>
                     <div className="particle"></div>
@@ -83,23 +93,26 @@ const SealedCapsuleModal = ({ isOpen, onClose, capsule }) => {
                     <X size={20} />
                 </button>
 
-                {/* Capsule Icon - Breathing animation */}
-                <div className="capsule-icon-container">
-                    <Package size={56} className="capsule-icon" />
+                {/* Envelope Icon */}
+                <div className="envelope-container">
+                    <Mail size={64} className="envelope-icon" />
+                    <div className="wax-seal">
+                        <Lock size={20} />
+                    </div>
                     <div className="glow-ring"></div>
                 </div>
 
-                {/* Lock Badge */}
-                <div className="lock-badge">
-                    <Lock size={14} className="lock-icon" />
-                    <span>Sealed Time Capsule</span>
+                {/* Badge */}
+                <div className="sealed-badge">
+                    <Lock size={14} />
+                    <span>Sealed Letter</span>
                 </div>
 
                 {/* Title */}
-                <h2>🔒 Waiting to Unlock</h2>
+                <h2>✉️ Waiting to be Opened</h2>
 
-                {/* Countdown boxes */}
-                {!isReady ? (
+                {/* Countdown or Life Event */}
+                {isDateBased && total > 0 ? (
                     <div className="countdown-container">
                         <div className="countdown-box">
                             <span className="value">{days}</span>
@@ -118,40 +131,49 @@ const SealedCapsuleModal = ({ isOpen, onClose, capsule }) => {
                             <span className="label">{seconds === 1 ? 'Sec' : 'Secs'}</span>
                         </div>
                     </div>
-                ) : (
-                    <div className="countdown-container">
-                        <div className="countdown-box" style={{ minWidth: '200px' }}>
-                            <span className="value">🎉</span>
-                            <span className="label">Ready to Open!</span>
+                ) : !isDateBased ? (
+                    <div className="life-event-info">
+                        <div className="event-icon">
+                            {getLifeEventInfo(letter.life_event).icon}
                         </div>
+                        <p>This letter opens when you experience:</p>
+                        <h3>{getLifeEventInfo(letter.life_event).label}</h3>
                     </div>
-                )}
+                ) : null}
 
                 {/* Message */}
                 <div className="modal-message">
-                    <p className="date-text">
-                        <Calendar size={14} className="calendar-icon" />
-                        Opens on {formatUnlockDate()}
-                    </p>
-                    <p className="reassurance">
-                        You wrote this for your future self.
+                    {isDateBased && (
+                        <p className="date-text">
+                            <Calendar size={14} />
+                            Opens on {formatUnlockDate()}
+                        </p>
+                    )}
+                    {!isDateBased && (
+                        <p className="event-text">
+                            <Gift size={14} />
+                            Trigger this event when the time comes
+                        </p>
+                    )}
+                    <p className="recipient-text">
+                        Written to: {letter.recipient === 'future' ? '✨ Future You' : '💜 Past You'}
                     </p>
                 </div>
 
-                {/* Capsule title if available */}
-                {capsule?.title && (
-                    <div className="capsule-title-preview">
+                {/* Letter title preview */}
+                {letter?.title && (
+                    <div className="letter-title-preview">
                         <span>📝</span>
-                        <span>{capsule.title}</span>
+                        <span>{letter.title}</span>
                     </div>
                 )}
 
                 <button className="okay-btn" onClick={onClose}>
-                    {isReady ? '🎁 Open Capsule' : 'I\'ll Wait ✨'}
+                    I'll Wait Patiently ✨
                 </button>
             </div>
         </div>
     );
 };
 
-export default SealedCapsuleModal;
+export default SealedLetterModal;

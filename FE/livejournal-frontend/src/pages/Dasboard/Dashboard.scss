@@ -1351,6 +1351,108 @@
           font-style: italic;
         }
       }
+
+      .chapters-data {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 0.5rem;
+
+        .chapters-stats {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+
+          .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 14px;
+            min-width: 80px;
+            position: relative;
+            overflow: hidden;
+
+            &::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 3px;
+              background: linear-gradient(90deg, var(--marvel-primary), var(--marvel-secondary));
+              opacity: 0.6;
+            }
+
+            .stat-value {
+              font-size: 2rem;
+              font-weight: 800;
+              background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              line-height: 1;
+              filter: drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3));
+            }
+
+            .stat-label {
+              font-size: 0.7rem;
+              text-transform: uppercase;
+              color: var(--text-secondary);
+              font-weight: 700;
+              letter-spacing: 0.08em;
+            }
+          }
+        }
+
+        .active-chapter-preview {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.875rem 1rem;
+          background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(168, 85, 247, 0.08));
+          border: 1px solid rgba(139, 92, 246, 0.25);
+          border-radius: 12px;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--marvel-primary), var(--marvel-secondary));
+            border-radius: 4px 0 0 4px;
+          }
+
+          .chapter-icon {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+          }
+
+          .chapter-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+          }
+
+          &::after {
+            content: '📖';
+            font-size: 0.75rem;
+            opacity: 0.5;
+          }
+        }
+      }
     }
 
     .card-action {
@@ -1372,6 +1474,171 @@
       svg {
         transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         filter: drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3));
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--marvel-primary), var(--marvel-secondary));
+        transition: width 0.3s ease;
+      }
+    }
+
+    &:hover .card-action {
+      svg {
+        transform: translateX(8px) scale(1.2);
+      }
+
+      &::before {
+        width: 60%;
+      }
+    }
+  }
+
+  // Letter to Myself Card (matches Life Chapters Card)
+  .letter-to-myself-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 4px 12px var(--card-shadow);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out 0.55s both;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(102, 126, 234, 0.1),
+          transparent);
+      transition: left 0.6s ease;
+    }
+
+    &:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+      border-color: var(--marvel-primary);
+
+      &::before {
+        left: 100%;
+      }
+
+      .card-action {
+        color: var(--marvel-secondary);
+      }
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--card-border);
+      position: relative;
+      z-index: 1;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--marvel-primary), var(--marvel-secondary));
+        transition: width 0.4s ease;
+      }
+
+      h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+
+        svg {
+          color: var(--marvel-primary);
+          filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+        }
+      }
+    }
+
+    &:hover .card-header::after {
+      width: 100%;
+    }
+
+    .letter-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+
+      .no-letter-data {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+        border-radius: 12px;
+        border: 2px dashed var(--card-border);
+
+        .prompt-icon {
+          font-size: 2.5rem;
+          margin-bottom: 0.75rem;
+          animation: float 3s ease-in-out infinite;
+        }
+
+        .prompt-text {
+          font-size: 1rem;
+          color: var(--text-primary);
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+
+        .hint {
+          font-size: 0.85rem;
+          color: var(--text-muted);
+          font-style: italic;
+        }
+      }
+    }
+
+    .card-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding-top: 1.25rem;
+      margin-top: 1.25rem;
+      border-top: 2px solid var(--card-border);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--marvel-primary);
+      transition: all 0.3s ease;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      position: relative;
+
+      svg {
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
       }
 
       &::before {

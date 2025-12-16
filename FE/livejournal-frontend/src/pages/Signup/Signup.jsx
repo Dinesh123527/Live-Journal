@@ -1,9 +1,10 @@
 import Cookies from 'js-cookie';
-import { CheckCircle2, Eye, EyeOff, Lock, Mail, Shield, User, XCircle } from 'lucide-react';
+import { Lock, Mail, Shield, User, X, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MarvelThemeSelector from '../../components/MarvelThemeSelector/MarvelThemeSelector';
 import Navbar from '../../components/Navbar/Navbar';
+import PasswordStrengthMeter from '../../components/PasswordStrengthMeter/PasswordStrengthMeter';
 import ScrollProgressBar from '../../components/ScrollProgressBar/ScrollProgressBar';
 import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 import axios from '../../utils/axiosInstance';
@@ -175,21 +176,32 @@ const Signup = () => {
                     autoComplete="new-password"
                     minLength={8}
                   />
+                  {formData.password && (
+                    <button
+                      type="button"
+                      className="clear-field-btn"
+                      onClick={() => {
+                        setFormData({ ...formData, password: '', confirmPassword: '' });
+                        setPasswordTouched(false);
+                        setPasswordMatchError('');
+                        setConfirmPasswordTouched(false);
+                      }}
+                      aria-label="Clear password"
+                    >
+                      <X size={18} />
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="toggle-password"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showPassword ? '🙈' : '👁️'}
                   </button>
                 </div>
                 {passwordTouched && formData.password && (
-                  <div className="password-strength">
-                    <span className={`strength-indicator ${formData.password.length >= 8 ? 'strong' : 'weak'}`}>
-                      {formData.password.length >= 8 ? '✓' : '✗'} Minimum 8 characters
-                    </span>
-                  </div>
+                  <PasswordStrengthMeter password={formData.password} />
                 )}
               </div>
 
@@ -214,21 +226,29 @@ const Signup = () => {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showConfirmPassword ? '🙈' : '👁️'}
                   </button>
-                  {showPasswordMatch && (
-                    <div className="match-indicator">
-                      {passwordsMatch ? (
-                        <CheckCircle2 size={20} className="match-icon" />
-                      ) : (
-                        <XCircle size={20} className="no-match-icon" />
-                      )}
-                    </div>
+                  {formData.confirmPassword && (
+                    <button
+                      type="button"
+                      className="clear-field-btn"
+                      onClick={() => {
+                        setFormData({ ...formData, confirmPassword: '' });
+                        setPasswordMatchError('');
+                        setConfirmPasswordTouched(false);
+                      }}
+                      aria-label="Clear confirm password"
+                    >
+                      <X size={18} />
+                    </button>
                   )}
                 </div>
                 {passwordMatchError && confirmPasswordTouched && (
                   <div className="field-error">
-                    {passwordMatchError}
+                    <div className="error-icon">
+                      <XCircle size={12} />
+                    </div>
+                    <span>{passwordMatchError}</span>
                   </div>
                 )}
               </div>

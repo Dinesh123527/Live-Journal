@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import { Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react';
+import { Lock, Mail, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MarvelThemeSelector from '../../components/MarvelThemeSelector/MarvelThemeSelector';
@@ -117,9 +117,13 @@ const Login = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showPassword ? '🙈' : '👁️'}
                   </button>
                 </div>
+              </div>
+
+              <div className="forgot-password-link">
+                <Link to="/forgot-password">Forgot your password?</Link>
               </div>
 
               <button

@@ -195,4 +195,159 @@ async function me(req, res) {
   }
 }
 
-module.exports = { register, login, refresh, logout, me };
+// FORGOT PASSWORD
+async function forgotPassword(req, res) {
+  const { email } = req.body;
+
+  // Always return same response for security (don't leak email existence)
+  const genericResponse = {
+    message: 'If an account with that email exists, a password reset link has been sent.'
+  };
+
+  try {
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const [users] = await db.query('SELECT id, email FROM users WHERE email = ?', [email]);
+
+    if (users.length === 0) {
+      // Don't reveal that email doesn't exist
+      return res.json(genericResponse);
+    }
+
+    const user = users[0];
+
+    // Generate secure random token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    // Hash token before storing (security best practice)
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    // Token expires in 15 minutes
+    const expiryMinutes = Number(process.env.RESET_TOKEN_EXPIRY_MINUTES) || 15;
+    const expires = new Date(Date.now() + expiryMinutes * 60 * 1000);
+
+    // Save hashed token to database
+    await db.query(
+      `UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?`,
+      [hashedToken, expires, user.id]
+    );
+
+    // Create reset link
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
+
+    // Send email
+    const transporter = require('../utils/mailer');
+    await transporter.sendMail({
+      from: `"Live Journal" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: '🔐 Reset your Live Journal password',
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #8b5cf6; font-size: 28px; margin: 0;">Live Journal</h1>
+          </div>
+          <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 16px; padding: 30px;">
+            <h2 style="color: #333; margin-top: 0;">Password Reset Request</h2>
+            <p style="color: #666; line-height: 1.6;">
+              You requested to reset your password. Click the button below to create a new password:
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetLink}" 
+                 style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); 
+                        color: white; text-decoration: none; padding: 14px 32px; border-radius: 10px; 
+                        font-weight: 600; font-size: 16px;">
+                Reset Password
+              </a>
+            </div>
+            <p style="color: #999; font-size: 14px;">
+              This link will expire in <strong>${expiryMinutes} minutes</strong>.
+            </p>
+            <p style="color: #999; font-size: 14px;">
+              If you didn't request this, please ignore this email. Your password will remain unchanged.
+            </p>
+          </div>
+          <p style="color: #aaa; font-size: 12px; text-align: center; margin-top: 30px;">
+            © ${new Date().getFullYear()} Live Journal. All rights reserved.
+          </p>
+        </div>
+      `
+    });
+
+    console.log(`Password reset email sent to ${user.email}`);
+    return res.json(genericResponse);
+  } catch (err) {
+    console.error('forgotPassword error', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+}
+
+// RESET PASSWORD
+async function resetPassword(req, res) {
+  const { token } = req.params;
+  const { newPassword, confirmPassword } = req.body;
+
+  try {
+    if (!token) {
+      return res.status(400).json({ error: 'Reset token is required' });
+    }
+
+    if (!newPassword || !confirmPassword) {
+      return res.status(400).json({ error: 'Password and confirmation are required' });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: 'Passwords do not match' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    // Hash the token to compare with stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find user with valid token
+    const [users] = await db.query(
+      `SELECT id FROM users 
+       WHERE reset_token = ? AND reset_token_expires > NOW()`,
+      [hashedToken]
+    );
+
+    if (users.length === 0) {
+      return res.status(400).json({
+        error: 'Invalid or expired reset token. Please request a new password reset.'
+      });
+    }
+
+    const userId = users[0].id;
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    // Update password and invalidate token (one-time use)
+    await db.query(
+      `UPDATE users 
+       SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL 
+       WHERE id = ?`,
+      [hashedPassword, userId]
+    );
+
+    // Also invalidate all existing refresh tokens for security
+    await db.query('DELETE FROM refresh_tokens WHERE user_id = ?', [userId]);
+
+    console.log(`Password reset successful for user ${userId}`);
+    return res.json({ message: 'Password reset successful. You can now login with your new password.' });
+  } catch (err) {
+    console.error('resetPassword error', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+}
+
+module.exports = { register, login, refresh, logout, me, forgotPassword, resetPassword };

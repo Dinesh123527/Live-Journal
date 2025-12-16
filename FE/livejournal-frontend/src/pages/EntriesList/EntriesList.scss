@@ -182,9 +182,12 @@
 
       // Pulsing glow animation
       @keyframes pulseGlow {
-        0%, 100% {
+
+        0%,
+        100% {
           box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
+
         50% {
           box-shadow: 0 4px 25px rgba(102, 126, 234, 0.5);
         }
@@ -255,15 +258,185 @@
       padding: 0.75rem 1.5rem;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
+      border-radius: 10px;
       color: var(--text-primary);
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
 
-      &:hover {
+      &:hover,
+      &.active {
         background: var(--card-hover);
         border-color: var(--marvel-primary);
+        color: var(--marvel-primary);
+      }
+    }
+  }
+
+  // Privacy Filter Tabs - matches Life Chapters design
+  .privacy-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.375rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    width: fit-content;
+
+    .privacy-tab {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      svg {
+        transition: all 0.3s ease;
+      }
+
+      &:hover {
+        color: var(--text-primary);
+        background: rgba(139, 92, 246, 0.05);
+
+        svg {
+          color: var(--marvel-primary);
+        }
+      }
+
+      &.active {
+        color: white;
+        background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+
+        svg {
+          color: white;
+        }
+      }
+    }
+  }
+
+  // Mood Filter Tabs - emoji buttons
+  .mood-tabs {
+    display: flex;
+    gap: 0.375rem;
+    margin-bottom: 1.5rem;
+    padding: 0.375rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    width: fit-content;
+    flex-wrap: wrap;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .mood-tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 0.875rem;
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 44px;
+
+      span {
+        transition: all 0.3s ease;
+      }
+
+      &:first-child {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      &:hover {
+        background: rgba(139, 92, 246, 0.08);
+        transform: scale(1.1);
+      }
+
+      &.active {
+        background: linear-gradient(135deg, var(--marvel-primary), var(--marvel-secondary));
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        transform: scale(1.05);
+
+        &:first-child {
+          color: white;
+        }
+
+        span {
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+      }
+    }
+  }
+
+  // Search Section - always visible
+  .search-section {
+    margin-bottom: 1.5rem;
+
+    .search-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1.25rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      transition: all 0.3s ease;
+
+      &:focus-within {
+        border-color: var(--marvel-primary);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+      }
+
+      svg {
+        color: var(--text-secondary);
+        flex-shrink: 0;
+      }
+
+      .search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        outline: none;
+
+        &::placeholder {
+          color: var(--text-muted);
+        }
+      }
+
+      .clear-filters-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        color: #ef4444;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+
+        &:hover {
+          background: rgba(239, 68, 68, 0.2);
+          border-color: #ef4444;
+        }
       }
     }
   }
@@ -691,7 +864,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeInUp {
@@ -699,6 +874,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -706,8 +882,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideInDown {
@@ -715,6 +896,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -726,6 +908,7 @@
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -733,9 +916,12 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
   }
+
   50% {
     box-shadow: 0 4px 25px rgba(102, 126, 234, 0.5);
   }

@@ -1,56 +1,58 @@
 import {
     ArrowLeft,
     Bold,
-    Clock,
+    Calendar,
+    Gift,
     Italic,
     List,
     ListOrdered,
     Loader,
-    Package,
-    Plus,
+    Mail,
     Sparkles,
+    Star,
     Tag,
     X
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal.jsx';
 import Navbar from '../../components/Navbar/Navbar.jsx';
 import PremiumDateTimePicker from '../../components/PremiumDateTimePicker/PremiumDateTimePicker.jsx';
 import axiosInstance from '../../utils/axiosInstance';
-import './TimeCapsule.scss';
+import './LetterToMyself.scss';
 
-const TimeCapsule = () => {
+const LIFE_EVENTS = [
+    { id: 'birthday', label: 'Birthday', icon: '🎂', description: 'Opens on your next birthday' },
+    { id: 'new_year', label: 'New Year', icon: '🎆', description: 'Opens on January 1st' },
+    { id: 'graduation', label: 'Graduation', icon: '🎓', description: 'Opens when you graduate' },
+    { id: 'got_job', label: 'Got a Job', icon: '💼', description: 'Opens when you get a new job' },
+    { id: 'moved_city', label: 'Moved City', icon: '🏠', description: 'Opens when you move' },
+    { id: 'got_married', label: 'Got Married', icon: '💒', description: 'Opens when you get married' },
+    { id: 'had_baby', label: 'Had a Baby', icon: '👶', description: 'Opens when you have a baby' },
+    { id: 'milestone_entries', label: 'Entry Milestone', icon: '📚', description: 'Opens after 100 entries' }
+];
+
+const LetterToMyself = () => {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const isTimeCapsuleMode = searchParams.get('mode') === 'time-capsule';
 
-    // Form states
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [tags, setTags] = useState([]);
     const [tagInput, setTagInput] = useState('');
-
-    // Time Capsule specific states
+    const [recipient, setRecipient] = useState('future');
+    const [unlockType, setUnlockType] = useState('date');
     const [unlockDate, setUnlockDate] = useState('');
     const [unlockTime, setUnlockTime] = useState('09:00');
-    const [isDateSet, setIsDateSet] = useState(false);
-
-    // UI states
+    const [lifeEvent, setLifeEvent] = useState('');
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const [showSealAnimation, setShowSealAnimation] = useState(false);
-
-    // Auto-save states
-    const [autoSaveStatus, setAutoSaveStatus] = useState('saved');
-    const autoSaveTimerRef = useRef(null);
-    const lastSavedDataRef = useRef({ title: '', body: '', tags: [] });
-
     const [userInfo, setUserInfo] = useState(null);
     const bodyTextareaRef = useRef(null);
     const lastBodyValueRef = useRef('');
+    const [showBackConfirm, setShowBackConfirm] = useState(false);
 
-    // Check if there's content
     const hasContent = useMemo(() => {
         const editor = bodyTextareaRef.current;
         const bodyText = editor ? (editor.textContent || editor.innerText || '').trim() : body.replace(/<[^>]*>/g, '').trim();
@@ -60,24 +62,25 @@ const TimeCapsule = () => {
     // Check if form is ready to submit
     const canSubmit = useMemo(() => {
         if (!hasContent) return false;
-        if (!unlockDate) return false;  // Date is required
+        if (!title.trim()) return false;  // Title is required
+        if (recipient === 'present') return true;  // Present letters don't need date
+        // Future letters need either a date or life event
+        if (unlockType === 'date' && !unlockDate) return false;
+        if (unlockType === 'life_event' && !lifeEvent) return false;
         return true;
-    }, [hasContent, unlockDate]);
+    }, [hasContent, title, recipient, unlockType, unlockDate, lifeEvent]);
 
-    // Get text content from editor
     const getTextContent = () => {
         const editor = bodyTextareaRef.current;
         if (!editor) return '';
         return editor.textContent || editor.innerText || '';
     };
 
-    // Calculate word count
     const wordCount = useMemo(() => {
         const text = getTextContent().trim();
         return text === '' ? 0 : text.split(/\s+/).filter(word => word.length > 0).length;
     }, [body]);
 
-    // Handle body change
     const handleBodyChange = useCallback(() => {
         const editor = bodyTextareaRef.current;
         if (!editor) return;
@@ -88,7 +91,6 @@ const TimeCapsule = () => {
         }
     }, []);
 
-    // Formatting handlers
     const applyFormatting = useCallback((command) => {
         const editor = bodyTextareaRef.current;
         if (!editor) return;
@@ -97,7 +99,6 @@ const TimeCapsule = () => {
         handleBodyChange();
     }, [handleBodyChange]);
 
-    // Fetch user info
     useEffect(() => {
         const fetchUserInfo = () => {
             try {
@@ -119,24 +120,17 @@ const TimeCapsule = () => {
         fetchUserInfo();
     }, []);
 
-    // Removed auto-set date - user must select explicitly
-
-    // Handle date change
     const handleDateChange = (e) => {
         const selectedDate = e.target.value;
         setUnlockDate(selectedDate);
-        setIsDateSet(true);
 
-        // Validate date is in future
         const selected = new Date(selectedDate + 'T' + unlockTime);
         if (selected <= new Date()) {
             setError('Please choose a future date');
             setTimeout(() => setError(null), 3000);
-            setIsDateSet(false);
         }
     };
 
-    // Format unlock date for display
     const formatUnlockDisplay = () => {
         if (!unlockDate) return '';
         const date = new Date(unlockDate + 'T' + unlockTime);
@@ -152,23 +146,29 @@ const TimeCapsule = () => {
         return tomorrow.toISOString().split('T')[0];
     };
 
-    // Save time capsule
-    const handleSaveTimeCapsule = async () => {
+    const handleSaveLetter = async () => {
         if (!body.trim()) {
-            setError('Please write something for your future self');
+            setError('Please write your letter');
             return;
         }
 
-        if (!unlockDate) {
-            setError('Please select when you\'d like to open this');
+        if (unlockType === 'date' && !unlockDate) {
+            setError('Please select when you\'d like to open this letter');
+            return;
+        }
+
+        if (unlockType === 'life_event' && !lifeEvent) {
+            setError('Please select a life event');
             return;
         }
 
         // Validate date is in future
-        const unlockDateTime = new Date(unlockDate + 'T' + unlockTime);
-        if (unlockDateTime <= new Date()) {
-            setError('Choose a future date');
-            return;
+        if (unlockType === 'date') {
+            const unlockDateTime = new Date(unlockDate + 'T' + unlockTime);
+            if (unlockDateTime <= new Date()) {
+                setError('Choose a future date');
+                return;
+            }
         }
 
         setSaving(true);
@@ -176,122 +176,158 @@ const TimeCapsule = () => {
         setShowSealAnimation(true);
 
         try {
-            await axiosInstance.post('/time-capsule', {
-                title: title || 'Time Capsule',
+            const payload = {
+                title: title || `Dear ${recipient === 'future' ? 'Future' : 'Past'} Me`,
                 body,
-                tags,
-                unlock_at: unlockDateTime.toISOString()
-            });
+                recipient,
+                unlock_type: unlockType,
+                tags
+            };
+
+            if (unlockType === 'date') {
+                payload.unlock_at = new Date(unlockDate + 'T' + unlockTime).toISOString();
+            } else {
+                payload.life_event = lifeEvent;
+            }
+
+            await axiosInstance.post('/letters', payload);
 
             // Show success after seal animation
             setTimeout(() => {
-                setSuccess('Your message has been safely sealed ✨');
+                setSuccess('Your letter has been sealed ✨');
 
                 // Navigate after showing success
                 setTimeout(() => {
-                    navigate('/dashboard');
+                    navigate('/dashboard/letters');
                 }, 2000);
             }, 800);
 
         } catch (error) {
-            console.error('Error saving time capsule:', error);
-            setError(error.response?.data?.error || 'Failed to save time capsule');
+            console.error('Error saving letter:', error);
+            setError(error.response?.data?.error || 'Failed to save letter');
             setShowSealAnimation(false);
         } finally {
             setSaving(false);
         }
     };
 
-    // Handle back navigation
     const handleBack = () => {
         if (hasContent) {
-            if (window.confirm('Are you sure? Your time capsule will not be saved.')) {
-                navigate('/dashboard');
-            }
+            setShowBackConfirm(true);
         } else {
-            navigate('/dashboard');
+            navigate('/dashboard/letters');
         }
     };
 
-    // Auto-save for body content
-    useEffect(() => {
-        const hasChanges =
-            title !== lastSavedDataRef.current.title ||
-            body !== lastSavedDataRef.current.body ||
-            JSON.stringify(tags) !== JSON.stringify(lastSavedDataRef.current.tags);
-
-        if (hasChanges && hasContent) {
-            setAutoSaveStatus('unsaved');
-        }
-
-        if (autoSaveTimerRef.current) {
-            clearTimeout(autoSaveTimerRef.current);
-        }
-
-        return () => {
-            if (autoSaveTimerRef.current) {
-                clearTimeout(autoSaveTimerRef.current);
-            }
-        };
-    }, [title, body, tags, hasContent]);
+    const confirmBack = () => {
+        setShowBackConfirm(false);
+        navigate('/dashboard');
+    };
 
     return (
-        <div className="time-capsule-page">
+        <div className="letter-page">
             <Navbar
                 showAuthButtons={false}
                 isAuthenticated={true}
                 userProfileInfo={userInfo}
             />
 
-            <div className="time-capsule-container">
-                {/* Header */}
-                <div className="tc-header">
+            <div className="letter-container">
+                <div className="letter-header">
                     <button className="back-btn" onClick={handleBack}>
                         <ArrowLeft size={20} />
-                        <span>Back to Dashboard</span>
+                        <span>Back</span>
                     </button>
                     <h1>
-                        <Package className="header-icon" size={28} />
-                        Time Capsule
+                        <Mail className="header-icon" size={28} />
+                        Letter to Myself
                     </h1>
                     <button
-                        className="view-capsules-btn"
-                        onClick={() => navigate('/dashboard/time-capsules')}
+                        className="view-letters-btn"
+                        onClick={() => navigate('/dashboard/letters')}
                     >
-                        View My Capsules
+                        My Letters
                     </button>
                 </div>
 
-                {/* Time Capsule Settings Card */}
-                <div className="tc-settings-card">
-                    <div className="settings-header">
-                        <Clock className="settings-icon" size={24} />
-                        <h2>⏳ Time Capsule</h2>
+                <div className="recipient-card">
+                    <h3>Who is this letter for?</h3>
+                    <div className="recipient-options">
+                        <button
+                            className={`recipient-btn ${recipient === 'future' ? 'active' : ''}`}
+                            onClick={() => setRecipient('future')}
+                        >
+                            <Sparkles size={20} />
+                            <span>Dear Future Me</span>
+                        </button>
+                        <button
+                            className={`recipient-btn ${recipient === 'present' ? 'active' : ''}`}
+                            onClick={() => setRecipient('present')}
+                        >
+                            <Star size={20} />
+                            <span>Dear Present Me</span>
+                        </button>
                     </div>
-
-                    <div className="settings-content">
-                        <PremiumDateTimePicker
-                            selectedDate={unlockDate}
-                            selectedTime={unlockTime}
-                            onDateChange={(date) => {
-                                setUnlockDate(date);
-                                setIsDateSet(true);
-                            }}
-                            onTimeChange={(time) => setUnlockTime(time)}
-                            minDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
-                        />
-
-                        <p className="settings-hint">
-                            ℹ️ This entry will stay sealed until then.
-                        </p>
-                    </div>
+                    {recipient === 'present' && (
+                        <p className="present-me-note">✨ This letter will be available immediately for self-reflection</p>
+                    )}
                 </div>
 
-                {/* Date Badge */}
-                {isDateSet && unlockDate && (
-                    <div className="unlock-badge">
-                        <Sparkles size={16} className="badge-icon" />
-                        <span>⏳ {formatUnlockDisplay()}</span>
+                {/* Unlock Type Card - Only show for future letters */}
+                {recipient === 'future' && (
+                    <div className="unlock-card">
+                        <h3>When should this letter open?</h3>
+                        <div className="unlock-type-tabs">
+                            <button
+                                className={`type-tab ${unlockType === 'date' ? 'active' : ''}`}
+                                onClick={() => setUnlockType('date')}
+                            >
+                                <Calendar size={18} />
+                                <span>On a Date</span>
+                            </button>
+                            <button
+                                className={`type-tab ${unlockType === 'life_event' ? 'active' : ''}`}
+                                onClick={() => setUnlockType('life_event')}
+                            >
+                                <Gift size={18} />
+                                <span>Life Event</span>
+                            </button>
+                        </div>
+
+                        {unlockType === 'date' ? (
+                            <PremiumDateTimePicker
+                                selectedDate={unlockDate}
+                                selectedTime={unlockTime}
+                                onDateChange={(date) => setUnlockDate(date)}
+                                onTimeChange={(time) => setUnlockTime(time)}
+                                minDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
+                            />
+                        ) : (
+                            <div className="life-events-grid">
+                                {LIFE_EVENTS.map((event) => (
+                                    <button
+                                        key={event.id}
+                                        className={`event-btn ${lifeEvent === event.id ? 'active' : ''}`}
+                                        onClick={() => setLifeEvent(event.id)}
+                                    >
+                                        <span className="event-icon">{event.icon}</span>
+                                        <span className="event-label">{event.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {unlockType === 'date' && unlockDate && (
+                            <p className="unlock-preview">
+                                📅 {formatUnlockDisplay()}
+                            </p>
+                        )}
+
+                        {unlockType === 'life_event' && lifeEvent && (
+                            <p className="unlock-preview">
+                                {LIFE_EVENTS.find(e => e.id === lifeEvent)?.icon} {LIFE_EVENTS.find(e => e.id === lifeEvent)?.description}
+                            </p>
+                        )}
                     </div>
                 )}
 
@@ -312,21 +348,21 @@ const TimeCapsule = () => {
                 )}
 
                 {/* Editor Form */}
-                <div className="tc-editor-form">
+                <div className="letter-editor-form">
                     <div className="form-group">
-                        <label htmlFor="title">Title (optional)</label>
+                        <label htmlFor="title">Title <span style={{ color: '#ef4444' }}>*</span></label>
                         <input
                             type="text"
                             id="title"
                             className="title-input"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Give your time capsule a name..."
+                            placeholder={`Dear ${recipient === 'future' ? 'Future' : 'Present'} Me...`}
                         />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="body">Message to your future self</label>
+                        <label htmlFor="body">Your Letter</label>
                         <div className="rich-text-toolbar">
                             <button
                                 type="button"
@@ -368,9 +404,9 @@ const TimeCapsule = () => {
                             ref={bodyTextareaRef}
                             onInput={handleBodyChange}
                             suppressContentEditableWarning={true}
-                            data-placeholder="Dear future me..."
+                            data-placeholder={`Start writing your letter to your ${recipient} self...`}
                             role="textbox"
-                            aria-label="Time capsule message"
+                            aria-label="Letter content"
                             aria-multiline="true"
                         />
                         <div className="editor-stats">
@@ -400,19 +436,6 @@ const TimeCapsule = () => {
                                 placeholder="Add a tag..."
                                 disabled={tags.length >= 5}
                             />
-                            <button
-                                className="add-tag-btn"
-                                onClick={() => {
-                                    if (tagInput.trim() !== '' && tags.length < 5) {
-                                        setTags([...tags, tagInput.trim()]);
-                                        setTagInput('');
-                                    }
-                                }}
-                                disabled={!tagInput.trim() || tags.length >= 5}
-                                type="button"
-                            >
-                                <Plus size={18} />
-                            </button>
                         </div>
                         {tags.length > 0 && (
                             <div className="tags-list">
@@ -434,8 +457,8 @@ const TimeCapsule = () => {
                     {/* Save Button */}
                     <div className="form-actions">
                         <button
-                            className={`save-capsule-btn ${showSealAnimation ? 'sealing' : ''}`}
-                            onClick={handleSaveTimeCapsule}
+                            className={`save-letter-btn ${showSealAnimation ? 'sealing' : ''}`}
+                            onClick={handleSaveLetter}
                             disabled={saving || !canSubmit}
                         >
                             {saving ? (
@@ -445,25 +468,37 @@ const TimeCapsule = () => {
                                 </>
                             ) : showSealAnimation ? (
                                 <div className="seal-animation">
-                                    <Package size={24} className="capsule-icon" />
+                                    <Mail size={24} className="letter-icon" />
                                 </div>
                             ) : (
                                 <>
-                                    <Package size={20} />
-                                    <span>📦 Save Time Capsule</span>
+                                    <Mail size={20} />
+                                    <span>{recipient === 'future' ? '✉️ Seal & Send to Future Me' : '🌟 Save for Present Me'}</span>
                                 </>
                             )}
                         </button>
                     </div>
 
-                    {/* Reassuring message */}
                     <p className="reassurance-text">
-                        We'll keep it safe until the right moment.
+                        This letter will be safely stored until the right moment.
                     </p>
                 </div>
             </div>
+
+            {/* Back Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showBackConfirm}
+                onClose={() => setShowBackConfirm(false)}
+                onConfirm={confirmBack}
+                title="Leave without saving?"
+                message="Your letter hasn't been sealed yet. If you leave now, everything you've written will be lost."
+                confirmText="Leave Anyway"
+                cancelText="Keep Writing"
+                type="warning"
+                confirmButtonStyle="danger"
+            />
         </div>
     );
 };
 
-export default TimeCapsule;
+export default LetterToMyself;

@@ -149,8 +149,13 @@
     margin-bottom: 1.5rem;
     animation: fadeInUp 0.6s ease-out both;
 
-    &:nth-child(1) { animation-delay: 0.3s; }
-    &:nth-child(2) { animation-delay: 0.4s; }
+    &:nth-child(1) {
+      animation-delay: 0.3s;
+    }
+
+    &:nth-child(2) {
+      animation-delay: 0.4s;
+    }
 
     label {
       display: block;
@@ -195,13 +200,13 @@
           box-shadow: 0 0 0 3px var(--marvel-glow, rgba(102, 126, 234, 0.1));
           transform: translateY(-2px);
 
-          ~ .input-icon {
+          ~.input-icon {
             color: var(--marvel-primary, #667eea);
             transform: scale(1.1) rotate(-5deg);
           }
         }
 
-        &:focus + .input-icon {
+        &:focus+.input-icon {
           color: var(--marvel-primary, #667eea);
           transform: scale(1.1) rotate(-5deg);
         }
@@ -218,26 +223,16 @@
 
       .toggle-password {
         position: absolute;
-        right: 1rem;
+        right: 0.75rem;
         background: none;
         border: none;
-        color: var(--icon-color, #999);
         cursor: pointer;
-        padding: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-        border-radius: 6px;
+        font-size: 1.1rem;
+        padding: 0.25rem;
+        transition: all 0.2s ease;
 
         &:hover {
-          color: var(--marvel-primary, #667eea);
-          background: var(--marvel-glow, rgba(102, 126, 234, 0.1));
           transform: scale(1.1);
-        }
-
-        &:active {
-          transform: scale(0.95);
         }
       }
     }
@@ -292,7 +287,7 @@
     &:hover:not(:disabled) {
       transform: translateY(-3px);
       box-shadow: 0 10px 30px var(--marvel-glow, rgba(102, 126, 234, 0.5)),
-                  0 5px 20px color-mix(in srgb, var(--marvel-secondary, #764ba2) 40%, transparent);
+        0 5px 20px color-mix(in srgb, var(--marvel-secondary, #764ba2) 40%, transparent);
 
       &::before {
         width: 400px;
@@ -317,6 +312,39 @@
     span {
       position: relative;
       z-index: 2;
+    }
+  }
+
+  .forgot-password-link {
+    text-align: right;
+    margin-top: 0.5rem;
+    animation: fadeIn 0.6s ease-out 0.45s both;
+
+    a {
+      font-size: 0.85rem;
+      color: var(--text-muted, #9ca3af);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: linear-gradient(90deg, var(--marvel-primary, #667eea), var(--marvel-secondary, #764ba2));
+        transition: width 0.3s ease;
+      }
+
+      &:hover {
+        color: var(--marvel-primary, #667eea);
+
+        &::after {
+          width: 100%;
+        }
+      }
     }
   }
 }
@@ -388,17 +416,43 @@
 }
 
 @keyframes float-particle-1 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(30px, -30px) rotate(90deg); }
-  50% { transform: translate(60px, 0) rotate(180deg); }
-  75% { transform: translate(30px, 30px) rotate(270deg); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(30px, -30px) rotate(90deg);
+  }
+
+  50% {
+    transform: translate(60px, 0) rotate(180deg);
+  }
+
+  75% {
+    transform: translate(30px, 30px) rotate(270deg);
+  }
 }
 
 @keyframes float-particle-2 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(-20px, 20px) rotate(-90deg); }
-  50% { transform: translate(-40px, 0) rotate(-180deg); }
-  75% { transform: translate(-20px, -20px) rotate(-270deg); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(-20px, 20px) rotate(-90deg);
+  }
+
+  50% {
+    transform: translate(-40px, 0) rotate(-180deg);
+  }
+
+  75% {
+    transform: translate(-20px, -20px) rotate(-270deg);
+  }
 }
 
 @keyframes slideUpFade {
@@ -406,6 +460,7 @@
     opacity: 0;
     transform: translateY(30px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -417,6 +472,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -424,8 +480,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeInUp {
@@ -433,6 +494,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -440,14 +502,29 @@
 }
 
 @keyframes expandWidth {
-  from { width: 0; }
-  to { width: 60px; }
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 60px;
+  }
 }
 
 @keyframes shakeError {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  75% { transform: translateX(10px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-10px);
+  }
+
+  75% {
+    transform: translateX(10px);
+  }
 }
 
 @keyframes fadeInScale {
@@ -455,8 +532,33 @@
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scanLine {
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes pulseIcon {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
     transform: scale(1);
   }
 }

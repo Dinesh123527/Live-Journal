@@ -10,6 +10,7 @@ import {
   Globe,
   Lightbulb,
   Lock,
+  Mail,
   Mic,
   Package,
   Sparkles,
@@ -52,6 +53,7 @@ const Dashboard = () => {
   const [todayLearning, setTodayLearning] = useState(null);
   const [hasLearningToday, setHasLearningToday] = useState(false);
   const [learningStreak, setLearningStreak] = useState({ current_streak: 0, longest_streak: 0 });
+  const [lifeChapters, setLifeChapters] = useState([]);
   const {
     startRecording,
     stopRecording,
@@ -94,7 +96,8 @@ const Dashboard = () => {
         remindersResponse,
         eventsResponse,
         learningTodayResponse,
-        learningStreakResponse
+        learningStreakResponse,
+        chaptersResponse
       ] = await Promise.all([
         axiosInstance.get('/auth/me'),
         axiosInstance.get('/analytics/streaks'),
@@ -106,7 +109,8 @@ const Dashboard = () => {
         axiosInstance.get('/reminders/upcoming?days=7'),
         axiosInstance.get(`/events?from=${fromDate}&to=${toDate}`),
         axiosInstance.get('/learning/today').catch(() => ({ data: { hasLearning: false, learning: null } })),
-        axiosInstance.get('/learning/streak').catch(() => ({ data: { current_streak: 0, longest_streak: 0 } }))
+        axiosInstance.get('/learning/streak').catch(() => ({ data: { current_streak: 0, longest_streak: 0 } })),
+        axiosInstance.get('/life-chapters').catch(() => ({ data: { data: [] } }))
       ]);
 
       // Set user info
@@ -167,6 +171,11 @@ const Dashboard = () => {
       // Set learning streak
       if (learningStreakResponse.data && learningStreakResponse.data.current_streak !== undefined) {
         setLearningStreak(learningStreakResponse.data);
+      }
+
+      // Set life chapters
+      if (chaptersResponse.data && chaptersResponse.data.data) {
+        setLifeChapters(chaptersResponse.data.data);
       }
 
     } catch (err) {
@@ -728,14 +737,56 @@ const Dashboard = () => {
               </h3>
             </div>
             <div className="chapters-content">
-              <div className="no-chapters-data">
-                <div className="prompt-icon">📖</div>
-                <p className="prompt-text">Your life, in meaningful phases</p>
-                <p className="hint">Group moments into chapters</p>
+              {lifeChapters && lifeChapters.length > 0 ? (
+                <div className="chapters-data">
+                  <div className="chapters-stats">
+                    <div className="stat-item">
+                      <span className="stat-value">{lifeChapters.filter(ch => ch.is_active).length}</span>
+                      <span className="stat-label">Active</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-value">{lifeChapters.length}</span>
+                      <span className="stat-label">Total</span>
+                    </div>
+                  </div>
+                  {lifeChapters.filter(ch => ch.is_active).slice(0, 1).map(chapter => (
+                    <div key={chapter.id} className="active-chapter-preview">
+                      <span className="chapter-icon">{chapter.icon || '📖'}</span>
+                      <span className="chapter-name">{chapter.title}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-chapters-data">
+                  <div className="prompt-icon">📖</div>
+                  <p className="prompt-text">Your life, in meaningful phases</p>
+                  <p className="hint">Group moments into chapters</p>
+                </div>
+              )}
+            </div>
+            <div className="card-action">
+              <span>{lifeChapters && lifeChapters.length > 0 ? 'View Chapters' : 'Start Writing'}</span>
+              <ArrowRight size={18} />
+            </div>
+          </div>
+
+          {/* Letter to Myself Card */}
+          <div className="letter-to-myself-card" onClick={() => navigate('/dashboard/letters')}>
+            <div className="card-header">
+              <h3>
+                <Mail size={20} />
+                Letter to Myself
+              </h3>
+            </div>
+            <div className="letter-content">
+              <div className="no-letter-data">
+                <div className="prompt-icon">✉️</div>
+                <p className="prompt-text">Write to your future self</p>
+                <p className="hint">Seal it for later or a life event</p>
               </div>
             </div>
             <div className="card-action">
-              <span>View Chapters</span>
+              <span>View Letters</span>
               <ArrowRight size={18} />
             </div>
           </div>

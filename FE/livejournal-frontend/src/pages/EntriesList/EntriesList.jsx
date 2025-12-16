@@ -1,20 +1,19 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  BookOpen,
-  Filter,
-  Search,
-  Calendar,
-  Tag,
-  Lock,
-  Globe,
+  ArrowLeft,
   ArrowRight,
+  BookOpen,
+  Calendar,
+  Globe,
   Loader,
-  ArrowLeft
+  Lock,
+  Search,
+  Tag
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar.jsx';
-import PullToRefresh from '../../components/PullToRefresh/PullToRefresh.jsx';
 import PinModal from '../../components/PinModal/PinModal.jsx';
+import PullToRefresh from '../../components/PullToRefresh/PullToRefresh.jsx';
 import axiosInstance from '../../utils/axiosInstance';
 import { truncateHtmlContent } from '../../utils/helpers';
 import './EntriesList.scss';
@@ -32,7 +31,7 @@ const EntriesList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMood, setSelectedMood] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
+  const [privacyFilter, setPrivacyFilter] = useState('all'); // 'all', 'public', 'private'
 
   // PIN modal states
   const [showPinModal, setShowPinModal] = useState(false);
@@ -93,7 +92,7 @@ const EntriesList = () => {
     fetchEntries(1);
     setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshKey, selectedMood, selectedTag, searchQuery]);
+  }, [refreshKey, selectedMood, selectedTag, searchQuery, privacyFilter]);
 
   const handleRefresh = async () => {
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -213,62 +212,90 @@ const EntriesList = () => {
               <p>{filteredEntries.length} {filteredEntries.length === 1 ? 'entry' : 'entries'} found</p>
             </div>
           </div>
+        </div>
+
+        {/* Privacy Tabs */}
+        <div className="privacy-tabs">
           <button
-            className="filter-toggle-btn"
-            onClick={() => setShowFilters(!showFilters)}
+            className={`privacy-tab ${privacyFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setPrivacyFilter('all')}
           >
-            <Filter size={20} />
-            <span>Filters</span>
+            <BookOpen size={16} />
+            <span>All</span>
+          </button>
+          <button
+            className={`privacy-tab ${privacyFilter === 'public' ? 'active' : ''}`}
+            onClick={() => setPrivacyFilter('public')}
+          >
+            <Globe size={16} />
+            <span>Public</span>
+          </button>
+          <button
+            className={`privacy-tab ${privacyFilter === 'private' ? 'active' : ''}`}
+            onClick={() => setPrivacyFilter('private')}
+          >
+            <Lock size={16} />
+            <span>Private</span>
           </button>
         </div>
 
-        {/* Filters */}
-        {showFilters && (
-          <div className="filters-section">
-            <div className="filter-group">
-              <Search size={18} />
-              <input
-                type="text"
-                placeholder="Search entries..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-            </div>
+        {/* Mood Filter Tabs */}
+        <div className="mood-tabs">
+          <button className={`mood-tab ${selectedMood === '' ? 'active' : ''}`} onClick={() => setSelectedMood('')}>
+            <span>All</span>
+          </button>
+          <button className={`mood-tab ${selectedMood === 'happy' ? 'active' : ''}`} onClick={() => setSelectedMood('happy')}>
+            <span>😊</span>
+          </button>
+          <button className={`mood-tab ${selectedMood === 'sad' ? 'active' : ''}`} onClick={() => setSelectedMood('sad')}>
+            <span>😢</span>
+          </button>
+          <button className={`mood-tab ${selectedMood === 'excited' ? 'active' : ''}`} onClick={() => setSelectedMood('excited')}>
+            <span>🤩</span>
+          </button>
+          <button className={`mood-tab ${selectedMood === 'calm' ? 'active' : ''}`} onClick={() => setSelectedMood('calm')}>
+            <span>😌</span>
+          </button>
+          <button className={`mood-tab ${selectedMood === 'stressed' ? 'active' : ''}`} onClick={() => setSelectedMood('stressed')}>
+            <span>😰</span>
+          </button>
+          <button className={`mood-tab ${selectedMood === 'anxious' ? 'active' : ''}`} onClick={() => setSelectedMood('anxious')}>
+            <span>😟</span>
+          </button>
+          <button className={`mood-tab ${selectedMood === 'angry' ? 'active' : ''}`} onClick={() => setSelectedMood('angry')}>
+            <span>😠</span>
+          </button>
+          <button className={`mood-tab ${selectedMood === 'neutral' ? 'active' : ''}`} onClick={() => setSelectedMood('neutral')}>
+            <span>😐</span>
+          </button>
+        </div>
 
-            <div className="filter-row">
-              <div className="filter-group">
-                <label>Mood</label>
-                <select
-                  value={selectedMood}
-                  onChange={(e) => setSelectedMood(e.target.value)}
-                  className="filter-select"
-                >
-                  <option value="">All Moods</option>
-                  <option value="happy">😊 Happy</option>
-                  <option value="sad">😢 Sad</option>
-                  <option value="angry">😠 Angry</option>
-                  <option value="stressed">😰 Stressed</option>
-                  <option value="excited">🤩 Excited</option>
-                  <option value="calm">😌 Calm</option>
-                  <option value="anxious">😟 Anxious</option>
-                  <option value="neutral">😐 Neutral</option>
-                </select>
-              </div>
-
+        {/* Search Bar */}
+        <div className="search-section">
+          <div className="search-group">
+            <Search size={18} />
+            <input
+              type="text"
+              placeholder="Search entries..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            {(searchQuery || selectedMood || privacyFilter !== 'all') && (
               <button
                 className="clear-filters-btn"
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedMood('');
                   setSelectedTag('');
+                  setPrivacyFilter('all');
                 }}
               >
-                Clear Filters
+                Clear
               </button>
-            </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Entries List */}
         <div className="entries-list">
@@ -290,73 +317,79 @@ const EntriesList = () => {
             </div>
           )}
 
-          {filteredEntries.map((entry) => (
-            <div
-              key={entry.id}
-              className={`entry-card ${entry.is_private === 1 ? 'private-entry locked' : 'public-entry'}`}
-              onClick={() => handleEntryClick(entry)}
-            >
-              <div className="entry-header">
-                <div className="entry-mood">
-                  {entry.is_private === 1 ? (
-                    <span className="mood-emoji locked">🔒</span>
-                  ) : (
-                    <span className="mood-emoji">{getMoodEmoji(entry.mood_label)}</span>
-                  )}
-                </div>
-                <div className="entry-meta-top">
-                  <div className="entry-date">
-                    <Calendar size={14} />
-                    <span>{formatDate(entry.created_at)}</span>
-                  </div>
-                  <div className="privacy-indicator">
+          {filteredEntries
+            .filter(entry => {
+              if (privacyFilter === 'public') return entry.is_private === 0;
+              if (privacyFilter === 'private') return entry.is_private === 1;
+              return true;
+            })
+            .map((entry) => (
+              <div
+                key={entry.id}
+                className={`entry-card ${entry.is_private === 1 ? 'private-entry locked' : 'public-entry'}`}
+                onClick={() => handleEntryClick(entry)}
+              >
+                <div className="entry-header">
+                  <div className="entry-mood">
                     {entry.is_private === 1 ? (
-                      <Lock size={14} className="private" />
+                      <span className="mood-emoji locked">🔒</span>
                     ) : (
-                      <Globe size={14} className="public" />
+                      <span className="mood-emoji">{getMoodEmoji(entry.mood_label)}</span>
                     )}
                   </div>
-                </div>
-              </div>
-
-              <div className="entry-content">
-                {entry.is_private === 1 ? (
-                  <>
-                    <h3>🔒 Private Entry</h3>
-                    <div className="locked-preview">
-                      <Lock size={24} />
-                      <p>This entry is private and protected.</p>
-                      <span className="unlock-hint">Click to unlock and view content</span>
+                  <div className="entry-meta-top">
+                    <div className="entry-date">
+                      <Calendar size={14} />
+                      <span>{formatDate(entry.created_at)}</span>
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <h3>{entry.title || 'Untitled Entry'}</h3>
-                    <p>{truncateHtmlContent(entry.body, 200)}</p>
-                  </>
-                )}
-              </div>
+                    <div className="privacy-indicator">
+                      {entry.is_private === 1 ? (
+                        <Lock size={14} className="private" />
+                      ) : (
+                        <Globe size={14} className="public" />
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-              {entry.is_private === 0 && parseTags(entry.tags).length > 0 && (
-                <div className="entry-tags">
-                  <Tag size={14} />
-                  {parseTags(entry.tags).slice(0, 3).map((tag, idx) => (
-                    <span key={idx} className="tag">#{tag}</span>
-                  ))}
-                  {parseTags(entry.tags).length > 3 && (
-                    <span className="tag-more">+{parseTags(entry.tags).length - 3}</span>
+                <div className="entry-content">
+                  {entry.is_private === 1 ? (
+                    <>
+                      <h3>🔒 Private Entry</h3>
+                      <div className="locked-preview">
+                        <Lock size={24} />
+                        <p>This entry is private and protected.</p>
+                        <span className="unlock-hint">Click to unlock and view content</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h3>{entry.title || 'Untitled Entry'}</h3>
+                      <p>{truncateHtmlContent(entry.body, 200)}</p>
+                    </>
                   )}
                 </div>
-              )}
 
-              <div className="entry-footer">
-                <span className="read-more">
-                  {entry.is_private === 1 ? 'Unlock to read' : 'Read more'}
-                  <ArrowRight size={16} />
-                </span>
+                {entry.is_private === 0 && parseTags(entry.tags).length > 0 && (
+                  <div className="entry-tags">
+                    <Tag size={14} />
+                    {parseTags(entry.tags).slice(0, 3).map((tag, idx) => (
+                      <span key={idx} className="tag">#{tag}</span>
+                    ))}
+                    {parseTags(entry.tags).length > 3 && (
+                      <span className="tag-more">+{parseTags(entry.tags).length - 3}</span>
+                    )}
+                  </div>
+                )}
+
+                <div className="entry-footer">
+                  <span className="read-more">
+                    {entry.is_private === 1 ? 'Unlock to read' : 'Read more'}
+                    <ArrowRight size={16} />
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
           {hasMore && !loading && (
             <button className="load-more-btn" onClick={loadMore}>
@@ -374,18 +407,20 @@ const EntriesList = () => {
       </div>
 
       {/* PIN Modal */}
-      {showPinModal && (
-        <PinModal
-          isOpen={showPinModal}
-          mode={pinModalMode}
-          onClose={() => setShowPinModal(false)}
-          onSuccess={() => {
-            handlePinSuccess();
-            setShowPinModal(false);
-          }}
-        />
-      )}
-    </div>
+      {
+        showPinModal && (
+          <PinModal
+            isOpen={showPinModal}
+            mode={pinModalMode}
+            onClose={() => setShowPinModal(false)}
+            onSuccess={() => {
+              handlePinSuccess();
+              setShowPinModal(false);
+            }}
+          />
+        )
+      }
+    </div >
   );
 };
 
