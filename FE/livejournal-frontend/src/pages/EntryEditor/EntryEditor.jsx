@@ -1,11 +1,16 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { ArrowLeft, Bold, Check, ChevronDown, Cloud, CloudOff, Globe, Italic, Lightbulb, List, ListOrdered, Loader, Lock, Plus, Send, Sparkles, Tag, Wand2, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Send, X, Loader, ArrowLeft, Lock, Globe, Bold, Italic, List, ListOrdered, Cloud, CloudOff, Plus, Tag } from 'lucide-react';
-import Navbar from '../../components/Navbar/Navbar.jsx';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal.jsx';
+import MoodDetector from '../../components/MoodDetector/MoodDetector.jsx';
+import Navbar from '../../components/Navbar/Navbar.jsx';
+import WritingPromptsPanel from '../../components/WritingPromptsPanel/WritingPromptsPanel.jsx';
 import axiosInstance from '../../utils/axiosInstance';
 import { replaceMathWithResult } from '../../utils/mathCalculator';
 import './EntryEditor.scss';
+
+// localStorage key for persisting entry data
+const LOCAL_STORAGE_KEY = 'livejournal_entry_draft';
 
 const EntryEditor = () => {
   const navigate = useNavigate();
@@ -13,12 +18,30 @@ const EntryEditor = () => {
   const isEditMode = !!entryId;
   const isDraftMode = !!draftId;
 
-  // Form states
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [tags, setTags] = useState([]);
+  // Helper to get initial state from localStorage for new entries
+  const getInitialState = () => {
+    // Only restore from localStorage for new entries (not edit or draft mode)
+    if (!entryId && !draftId) {
+      try {
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Error reading from localStorage:', e);
+      }
+    }
+    return null;
+  };
+
+  const savedState = getInitialState();
+
+  // Form states - restore from localStorage if available
+  const [title, setTitle] = useState(savedState?.title || '');
+  const [body, setBody] = useState(savedState?.body || '');
+  const [tags, setTags] = useState(savedState?.tags || []);
   const [tagInput, setTagInput] = useState('');
-  const [isPrivate, setIsPrivate] = useState(true);
+  const [isPrivate, setIsPrivate] = useState(savedState?.isPrivate ?? true);
 
   // Draft states
   const [currentDraftId, setCurrentDraftId] = useState(draftId || null);
@@ -48,6 +71,25 @@ const EntryEditor = () => {
 
   const bodyTextareaRef = useRef(null);
   const lastBodyValueRef = useRef('');
+
+  // AI Rewrite states
+  const [showRewriteMenu, setShowRewriteMenu] = useState(false);
+  const [rewriting, setRewriting] = useState(false);
+  const [rewriteResult, setRewriteResult] = useState(null);
+  const [rewriteStyle, setRewriteStyle] = useState(null);
+  const rewriteMenuRef = useRef(null);
+
+  // AI Auto-Tagging states
+  const [suggestingTags, setSuggestingTags] = useState(false);
+  const [suggestedTags, setSuggestedTags] = useState([]);
+
+  // AI Mood Detection states
+  const [detectedMoodLabel, setDetectedMoodLabel] = useState(null);
+  const [detectedMoodScore, setDetectedMoodScore] = useState(null);
+
+  // AI Writing Prompts states
+  const [showPromptsPanel, setShowPromptsPanel] = useState(false);
+
 
   // Track if there's content in the editor - needs to recalculate on body change
   const hasContent = useMemo(() => {
@@ -104,6 +146,173 @@ const EntryEditor = () => {
     handleBodyChange();
   }, [handleBodyChange]);
 
+  // Close rewrite menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (rewriteMenuRef.current && !rewriteMenuRef.current.contains(event.target)) {
+        setShowRewriteMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Handle AI rewrite
+  const handleRewrite = async (style) => {
+    const textContent = getTextContent().trim();
+    if (!textContent || textContent.length < 20) {
+      setError('Please write at least 20 characters to use AI rewrite');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
+    setShowRewriteMenu(false);
+    setRewriting(true);
+    setRewriteStyle(style);
+    setRewriteResult(null);
+
+    try {
+      const response = await axiosInstance.post('/ai/rewrite', {
+        text: textContent,
+        style: style
+      });
+
+      if (response.data && response.data.result) {
+        setRewriteResult(response.data.result);
+      } else {
+        throw new Error('No result received');
+      }
+    } catch (err) {
+      console.error('Rewrite error:', err);
+      setError(err.response?.data?.error || 'Failed to rewrite text. Please try again.');
+      setTimeout(() => setError(null), 4000);
+    } finally {
+      setRewriting(false);
+    }
+  };
+
+  // Accept rewritten text
+  const acceptRewrite = () => {
+    if (rewriteResult && bodyTextareaRef.current) {
+      bodyTextareaRef.current.innerHTML = rewriteResult;
+      setBody(rewriteResult);
+      lastBodyValueRef.current = rewriteResult;
+      setRewriteResult(null);
+      setRewriteStyle(null);
+      setSuccess('Text rewritten successfully!');
+      setTimeout(() => setSuccess(null), 2000);
+    }
+  };
+
+  // Reject rewritten text
+  const rejectRewrite = () => {
+    setRewriteResult(null);
+    setRewriteStyle(null);
+  };
+
+  // AI Auto-Tagging: Request tag suggestions from AI
+  const handleSuggestTags = async () => {
+    const textContent = getTextContent().trim();
+    if (!textContent || textContent.length < 20) {
+      setError('Please write at least 20 characters to get tag suggestions');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
+    setSuggestingTags(true);
+    setSuggestedTags([]);
+
+    try {
+      const response = await axiosInstance.post('/ai/tags', {
+        text: textContent,
+        limit: 8
+      });
+
+      if (response.data && response.data.tags && response.data.tags.length > 0) {
+        // Filter out tags that are already added
+        const existingTagsLower = tags.map(t => t.toLowerCase());
+        const newSuggestions = response.data.tags.filter(
+          tag => !existingTagsLower.includes(tag.toLowerCase())
+        );
+
+        if (newSuggestions.length > 0) {
+          setSuggestedTags(newSuggestions);
+        } else {
+          setSuccess('All suggested tags are already added!');
+          setTimeout(() => setSuccess(null), 2000);
+        }
+      } else {
+        setError('No tag suggestions available for this content');
+        setTimeout(() => setError(null), 3000);
+      }
+    } catch (err) {
+      console.error('Tag suggestion error:', err);
+      setError(err.response?.data?.error || 'Failed to get tag suggestions');
+      setTimeout(() => setError(null), 4000);
+    } finally {
+      setSuggestingTags(false);
+    }
+  };
+
+  // Accept a single suggested tag
+  const acceptSuggestedTag = (tag) => {
+    if (tags.length >= 10) {
+      setError('Maximum 10 tags allowed');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+    setTags([...tags, tag]);
+    setSuggestedTags(suggestedTags.filter(t => t !== tag));
+  };
+
+  // Reject a single suggested tag
+  const rejectSuggestedTag = (tag) => {
+    setSuggestedTags(suggestedTags.filter(t => t !== tag));
+  };
+
+  // Accept all suggested tags
+  const acceptAllSuggestedTags = () => {
+    const remainingSlots = 10 - tags.length;
+    if (remainingSlots <= 0) {
+      setError('Maximum 10 tags allowed');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+    const tagsToAdd = suggestedTags.slice(0, remainingSlots);
+    setTags([...tags, ...tagsToAdd]);
+    setSuggestedTags([]);
+    setSuccess(`Added ${tagsToAdd.length} tags!`);
+    setTimeout(() => setSuccess(null), 2000);
+  };
+
+  // AI Mood Detection handler
+  const handleMoodDetected = (moodLabel, moodScore) => {
+    setDetectedMoodLabel(moodLabel);
+    setDetectedMoodScore(moodScore);
+    setSuccess(`Mood set to ${moodLabel}`);
+    setTimeout(() => setSuccess(null), 2000);
+  };
+
+  // AI Writing Prompts handler
+  const handleSelectPrompt = (promptText, category) => {
+    if (!title.trim()) {
+      setTitle(promptText);
+    } else {
+      // Insert at beginning of body
+      const currentBody = body || '';
+      const newBody = `<p><em>${promptText}</em></p>${currentBody}`;
+      setBody(newBody);
+      if (bodyTextareaRef.current) {
+        bodyTextareaRef.current.innerHTML = newBody;
+        lastBodyValueRef.current = newBody;
+      }
+    }
+    setShowPromptsPanel(false);
+    setSuccess('Prompt added to your entry!');
+    setTimeout(() => setSuccess(null), 2000);
+  };
+
   // Fetch user info on mount
   useEffect(() => {
     const fetchUserInfo = () => {
@@ -147,6 +356,25 @@ const EntryEditor = () => {
     }
   }, [body]);
 
+  // Persist form data to localStorage immediately on every change (for new entries only)
+  useEffect(() => {
+    // Only persist for new entries (not edit or draft mode with existing ID)
+    if (!isEditMode && !isDraftMode) {
+      const dataToSave = {
+        title,
+        body,
+        tags,
+        isPrivate,
+        savedAt: new Date().toISOString()
+      };
+
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+      } catch (e) {
+        console.error('Error saving to localStorage:', e);
+      }
+    }
+  }, [title, body, tags, isPrivate, isEditMode, isDraftMode]);
 
   // Keyboard shortcuts for formatting
   const handleKeyDown = useCallback((e) => {
@@ -164,6 +392,8 @@ const EntryEditor = () => {
           break;
       }
     }
+
+
 
     // Handle math calculation only when "=" is pressed
     if (e.key === '=') {
@@ -347,6 +577,9 @@ const EntryEditor = () => {
         setSuccess('Entry created successfully');
       }
 
+      // Clear localStorage after successful publish
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
@@ -404,7 +637,13 @@ const EntryEditor = () => {
   // Handle cancel with confirmation if there's content
   const handleCancel = () => {
     if (hasContent) {
-      openConfirmModal('cancel', () => navigate('/dashboard'));
+      openConfirmModal('cancel', () => {
+        // Clear localStorage for new entries when discarding
+        if (!isEditMode && !isDraftMode) {
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+        }
+        navigate('/dashboard');
+      });
     } else {
       navigate('/dashboard');
     }
@@ -413,7 +652,13 @@ const EntryEditor = () => {
   // Handle back navigation with confirmation if there's content
   const handleBack = () => {
     if (hasContent) {
-      openConfirmModal('cancel', () => navigate('/dashboard'));
+      openConfirmModal('cancel', () => {
+        // Clear localStorage for new entries when discarding
+        if (!isEditMode && !isDraftMode) {
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+        }
+        navigate('/dashboard');
+      });
     } else {
       navigate('/dashboard');
     }
@@ -470,6 +715,8 @@ const EntryEditor = () => {
 
           if (response.data && response.data.draft && response.data.draft.id) {
             setCurrentDraftId(response.data.draft.id);
+            // Clear localStorage once draft is successfully created on server
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
           }
           setAutoSaveStatus('saved');
           lastSavedDataRef.current = { title, body, tags, isPrivate };
@@ -582,6 +829,26 @@ const EntryEditor = () => {
           </div>
         )}
 
+        {/* AI Writing Prompts Toggle & Panel */}
+        {!hasContent && !showPromptsPanel && (
+          <button
+            className="prompts-toggle-btn"
+            onClick={() => setShowPromptsPanel(true)}
+          >
+            <Lightbulb size={18} />
+            <span>Need inspiration? Get AI writing prompts</span>
+            <Sparkles size={14} className="sparkle-icon" />
+          </button>
+        )}
+
+        {showPromptsPanel && (
+          <WritingPromptsPanel
+            onSelectPrompt={handleSelectPrompt}
+            onClose={() => setShowPromptsPanel(false)}
+            isVisible={showPromptsPanel}
+          />
+        )}
+
         <div className="editor-form">
           <div className="form-group">
             <label htmlFor="title">Title</label>
@@ -634,6 +901,76 @@ const EntryEditor = () => {
               >
                 <ListOrdered size={18} />
               </button>
+
+              {/* Divider */}
+              <div className="toolbar-divider"></div>
+
+              {/* AI Rewrite Button */}
+              <div className="rewrite-dropdown" ref={rewriteMenuRef}>
+                <button
+                  type="button"
+                  className={`toolbar-btn rewrite-btn ${showRewriteMenu ? 'active' : ''} ${rewriting ? 'loading' : ''}`}
+                  onClick={() => setShowRewriteMenu(!showRewriteMenu)}
+                  title="AI Rewrite (TensorFlow ML)"
+                  aria-label="AI Rewrite"
+                  disabled={rewriting}
+                >
+                  {rewriting ? (
+                    <Loader size={18} className="spinner" />
+                  ) : (
+                    <>
+                      <Wand2 size={18} />
+                      <ChevronDown size={12} className="chevron" />
+                    </>
+                  )}
+                </button>
+
+                {showRewriteMenu && (
+                  <div className="rewrite-menu">
+                    <div className="rewrite-menu-header">
+                      <Sparkles size={16} />
+                      <span>AI Text Rewrite</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="rewrite-option"
+                      onClick={() => handleRewrite('concise')}
+                    >
+                      <span className="option-icon">✨</span>
+                      <div className="option-content">
+                        <span className="option-title">Concise</span>
+                        <span className="option-desc">Make text shorter & clearer</span>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      className="rewrite-option"
+                      onClick={() => handleRewrite('positive')}
+                    >
+                      <span className="option-icon">😊</span>
+                      <div className="option-content">
+                        <span className="option-title">Positive</span>
+                        <span className="option-desc">Transform to positive tone</span>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      className="rewrite-option"
+                      onClick={() => handleRewrite('reflective')}
+                    >
+                      <span className="option-icon">🔮</span>
+                      <div className="option-content">
+                        <span className="option-title">Reflective</span>
+                        <span className="option-desc">Add introspective framing</span>
+                      </div>
+                    </button>
+                    <div className="rewrite-menu-footer">
+                      <span>Powered by TensorFlow ML</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </div>
             <div
               id="body"
@@ -669,14 +1006,69 @@ const EntryEditor = () => {
                 <strong>{counts.readingTime}</strong> {counts.readingTime === 1 ? 'min read' : 'min read'}
               </span>
             </div>
+
+            {/* AI Rewrite Preview Panel */}
+            {rewriteResult && (
+              <div className="rewrite-preview-panel">
+                <div className="preview-header">
+                  <div className="preview-title">
+                    <Sparkles size={18} />
+                    <span>AI Rewrite Preview</span>
+                    <span className="style-badge">
+                      {rewriteStyle === 'concise' && '✨ Concise'}
+                      {rewriteStyle === 'positive' && '😊 Positive'}
+                      {rewriteStyle === 'reflective' && '🔮 Reflective'}
+                    </span>
+                  </div>
+                  <div className="preview-actions">
+                    <button
+                      type="button"
+                      className="preview-btn accept"
+                      onClick={acceptRewrite}
+                      title="Accept rewritten text"
+                    >
+                      <Check size={16} />
+                      <span>Accept</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="preview-btn reject"
+                      onClick={rejectRewrite}
+                      title="Reject and keep original"
+                    >
+                      <X size={16} />
+                      <span>Reject</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="preview-content">
+                  <p>{rewriteResult}</p>
+                </div>
+              </div>
+            )}
+
+            {/* AI Mood Detection */}
+            <MoodDetector
+              text={getTextContent()}
+              onMoodDetected={handleMoodDetected}
+              currentMood={detectedMoodLabel}
+              disabled={isEditMode}
+              debounceMs={2500}
+            />
           </div>
 
           <div className="form-group tags-group">
             <div className="tags-header">
-              <label htmlFor="tags">
-                <Tag size={18} />
-                Tags
-              </label>
+              <div className="tags-title-section">
+                <label htmlFor="tags">
+                  <Tag size={18} />
+                  <span className="tags-title-text">Tags</span>
+                  <span className="ai-badge">
+                    <Sparkles size={10} />
+                    AI
+                  </span>
+                </label>
+              </div>
               <span className={`tags-counter ${tags.length >= 10 ? 'limit-reached' : ''}`}>
                 {tags.length}/10
               </span>
@@ -721,7 +1113,67 @@ const EntryEditor = () => {
                 <Plus size={18} />
                 <span>Add</span>
               </button>
+              <button
+                className={`suggest-tags-btn ${suggestingTags ? 'loading' : ''}`}
+                onClick={handleSuggestTags}
+                disabled={suggestingTags || tags.length >= 10 || body.replace(/<[^>]*>/g, '').trim().length < 20}
+                type="button"
+                title={body.replace(/<[^>]*>/g, '').trim().length < 20 ? "Write at least 20 characters to get tag suggestions" : "AI Suggest Tags"}
+              >
+                {suggestingTags ? (
+                  <Loader size={18} className="spinner" />
+                ) : (
+                  <Sparkles size={18} />
+                )}
+                <span>{suggestingTags ? 'Suggesting...' : 'Suggest'}</span>
+              </button>
             </div>
+
+            {/* AI Suggested Tags Panel */}
+            {suggestedTags.length > 0 && (
+              <div className="suggested-tags-panel">
+                <div className="suggested-tags-header">
+                  <div className="suggested-tags-title">
+                    <Sparkles size={16} />
+                    <span>AI Suggested Tags</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="accept-all-btn"
+                    onClick={acceptAllSuggestedTags}
+                    disabled={tags.length >= 10}
+                  >
+                    <Check size={14} />
+                    <span>Accept All</span>
+                  </button>
+                </div>
+                <div className="suggested-tags-list">
+                  {suggestedTags.map((tag, index) => (
+                    <span key={index} className="suggested-tag">
+                      <span className="suggested-tag-text">{tag}</span>
+                      <button
+                        type="button"
+                        className="suggested-tag-accept"
+                        onClick={() => acceptSuggestedTag(tag)}
+                        title="Accept tag"
+                        disabled={tags.length >= 10}
+                      >
+                        <Check size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="suggested-tag-reject"
+                        onClick={() => rejectSuggestedTag(tag)}
+                        title="Reject tag"
+                      >
+                        <X size={14} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {tags.length > 0 && (
               <div className="tags-list">
                 {tags.map((tag, index) => (
@@ -742,9 +1194,8 @@ const EntryEditor = () => {
             <div className="tags-info">
               <p className="helper-text">
                 {tags.length === 0 ? 'Add tags to categorize your entry' :
-                 tags.length >= 10 ? 'Maximum tags reached' :
-                 `${10 - tags.length} more tag${10 - tags.length === 1 ? '' : 's'} available`}
-              </p>
+                  tags.length >= 10 ? 'Maximum tags reached' :
+                    `${10 - tags.length} more tag${10 - tags.length === 1 ? '' : 's'} available`}</p>
             </div>
           </div>
 

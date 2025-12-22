@@ -1,7 +1,6 @@
 require('dotenv').config();
 const db = require('../db');
 
-// Life events that can trigger letter unlock
 const LIFE_EVENTS = [
     'birthday',
     'new_year',
@@ -13,10 +12,6 @@ const LIFE_EVENTS = [
     'milestone_entries'
 ];
 
-/**
- * Create a new letter to yourself
- * POST /api/letters
- */
 async function createLetter(req, res) {
     try {
         const userId = req.user.id;

@@ -4,14 +4,17 @@ const db = require('../db');
 
 const API_KEY = process.env.NLP_CLOUD_API_KEY || null;
 const MODEL = process.env.NLP_CLOUD_MODEL || 'distilbert-base-uncased-emotion';
-const INSIGHT_MODEL = process.env.AI_INSIGHTS_MODEL || 'flan-t5-base'; 
+const INSIGHT_MODEL = process.env.AI_INSIGHTS_MODEL || 'dolphin';
 const INSIGHT_ENABLED = !!(API_KEY && INSIGHT_MODEL);
 
-if (!API_KEY) {
-  console.warn('NLP Cloud API key not found in .env (NLP_CLOUD_API_KEY). AI fallback = neutral and insights fallback to local summarizer.');
-}
-console.log(`NLP Cloud sentiment model: ${MODEL}`);
+// Google Gemini API (free alternative)
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || null;
 
+if (!API_KEY && !GEMINI_API_KEY) {
+  console.warn('No AI API key found. Set NLP_CLOUD_API_KEY or GEMINI_API_KEY in .env for AI features.');
+}
+if (GEMINI_API_KEY) console.log('✅ Google Gemini AI enabled');
+console.log(`NLP Cloud sentiment model: ${MODEL}`);
 if (INSIGHT_MODEL) console.log(`NLP Cloud insight/generation model: ${INSIGHT_MODEL}`);
 
 function clamp01(v) {
@@ -62,58 +65,69 @@ function mapLabelToMood(label, rawScore) {
 }
 
 //
-// Model generation wrapper (try NLP Cloud generation model if configured)
+// Model generation wrapper - tries Gemini first, then NLP Cloud
 //
 async function generateTextWithModel(prompt, max_length = 180) {
-  if (!API_KEY || !INSIGHT_MODEL) return null;
-
-  // Don't use encodeURIComponent - just use the model name directly
-  const genUrl = `https://api.nlpcloud.io/v1/${INSIGHT_MODEL}/generation`;
-  
-  try {
-    const resp = await axios.post(
-      genUrl,
-      { 
-        text: prompt,
-        max_length,
-        remove_input: true,
-        num_return_sequences: 1,
-        length_no_input: true
-      },
-      {
-        headers: { 
-          Authorization: `Token ${API_KEY}`, 
-          'Content-Type': 'application/json' 
+  // Try Google Gemini first (free and reliable)
+  if (GEMINI_API_KEY) {
+    try {
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+      const resp = await axios.post(
+        geminiUrl,
+        {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            maxOutputTokens: max_length,
+            temperature: 0.7
+          }
         },
-        timeout: 15000,
-      }
-    );
+        { timeout: 15000 }
+      );
 
-    if (!resp || !resp.data) return null;
-    
-    // NLP Cloud returns generated_text for generation models
-    if (typeof resp.data.generated_text === 'string') {
-      return resp.data.generated_text.trim();
+      const text = resp.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) {
+        console.log('[ai.generateTextWithModel] Gemini success');
+        return text.trim();
+      }
+    } catch (err) {
+      console.warn('[ai.generateTextWithModel] Gemini error:', err.response?.data?.error?.message || err.message);
     }
-    if (typeof resp.data.text === 'string') {
-      return resp.data.text.trim();
-    }
-    
-    console.warn('[ai.generateTextWithModel] Unexpected response format:', resp.data);
-    return null;
-  } catch (err) {
-    if (err.response) {
-      console.error('[ai.generateTextWithModel] NLP Cloud error:', {
-        status: err.response.status,
-        data: err.response.data,
-        url: genUrl,
-        model: INSIGHT_MODEL
-      });
-    } else {
-      console.warn('[ai.generateTextWithModel] generation failed', err.message);
-    }
-    return null;
   }
+
+  // Fallback to NLP Cloud
+  if (API_KEY && INSIGHT_MODEL) {
+    const genUrl = `https://api.nlpcloud.io/v1/${INSIGHT_MODEL}/generation`;
+    try {
+      const resp = await axios.post(
+        genUrl,
+        {
+          text: prompt,
+          max_length,
+          remove_input: true,
+          num_return_sequences: 1,
+          length_no_input: true
+        },
+        {
+          headers: {
+            Authorization: `Token ${API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 15000,
+        }
+      );
+
+      if (resp?.data?.generated_text) {
+        return resp.data.generated_text.trim();
+      }
+      if (resp?.data?.text) {
+        return resp.data.text.trim();
+      }
+    } catch (err) {
+      console.warn('[ai.generateTextWithModel] NLP Cloud error:', err.response?.status || err.message);
+    }
+  }
+
+  return null;
 }
 
 //
@@ -165,7 +179,7 @@ async function generateMoodInsights(userId, dateFrom, dateTo) {
   );
 
   let daily = dailyRows.map(r => ({
-    date: r.date ? (typeof r.date === 'string' ? r.date : r.date.toISOString().slice(0,10)) : null,
+    date: r.date ? (typeof r.date === 'string' ? r.date : r.date.toISOString().slice(0, 10)) : null,
     avg_mood_score: r.avg_mood_score !== null ? Number(r.avg_mood_score) : null,
     entries_count: Number(r.entries_count || 0),
     dominant_mood: r.dominant_mood || null,
@@ -182,7 +196,7 @@ async function generateMoodInsights(userId, dateFrom, dateTo) {
       [userId, dateFrom, dateTo]
     );
     daily = entries.map(r => ({
-      date: r.date ? (typeof r.date === 'string' ? r.date : r.date.toISOString().slice(0,10)) : null,
+      date: r.date ? (typeof r.date === 'string' ? r.date : r.date.toISOString().slice(0, 10)) : null,
       avg_mood_score: r.avg_mood_score !== null ? Number(r.avg_mood_score) : null,
       entries_count: Number(r.entries_count || 0),
       dominant_mood: null,
@@ -246,7 +260,7 @@ async function generateMoodInsights(userId, dateFrom, dateTo) {
       if (insightObj.happiest) promptParts.push(`Happiest day: ${insightObj.happiest.date} (avg ${insightObj.happiest.avg_mood_score?.toFixed(2)}).`);
       if (insightObj.lowest) promptParts.push(`Lowest day: ${insightObj.lowest.date} (avg ${insightObj.lowest.avg_mood_score?.toFixed(2)}).`);
       if (insightObj.topTags && insightObj.topTags.length) {
-        const tagPreview = insightObj.topTags.slice(0,3).map(t => `${t.tag} (${t.occurrences})`).join(', ');
+        const tagPreview = insightObj.topTags.slice(0, 3).map(t => `${t.tag} (${t.occurrences})`).join(', ');
         promptParts.push(`Top tags: ${tagPreview}.`);
       }
       promptParts.push(`Trend direction: ${insightObj.trend.direction} (change ${insightObj.trend.change?.toFixed(3)}).`);
@@ -266,7 +280,7 @@ async function generateMoodInsights(userId, dateFrom, dateTo) {
     if (insightObj.happiest) parts.push(`Happiest day: ${insightObj.happiest.date} (avg ${insightObj.happiest.avg_mood_score?.toFixed(2)}).`);
     if (insightObj.lowest) parts.push(`Lowest day: ${insightObj.lowest.date} (avg ${insightObj.lowest.avg_mood_score?.toFixed(2)}).`);
     if (insightObj.topTags && insightObj.topTags.length) {
-      parts.push(`Top tags: ${insightObj.topTags.slice(0,3).map(t => t.tag).join(', ')}.`);
+      parts.push(`Top tags: ${insightObj.topTags.slice(0, 3).map(t => t.tag).join(', ')}.`);
     }
     if (insightObj.trend && insightObj.trend.direction) parts.push(`Trend: ${insightObj.trend.direction} ${insightObj.trend.change ? `(change ${insightObj.trend.change.toFixed(3)})` : ''}.`);
     if (insightObj.streaks) parts.push(`Writing streak: ${insightObj.streaks.current_streak} days (longest ${insightObj.streaks.longest_streak}).`);
@@ -297,10 +311,24 @@ async function generateMoodInsights(userId, dateFrom, dateTo) {
 
 /**
  * rewriteText(text, style) - style: 'concise' | 'positive' | 'reflective'
+ * Uses TensorFlow ML service first, falls back to Gemini API, then basic heuristics
  */
 async function rewriteText(text, style = 'concise') {
   if (!text) return text;
 
+  // Try custom TensorFlow ML service first
+  try {
+    const mlService = require('./mlTextService');
+    const mlResult = await mlService.rewriteText(text, style);
+    if (mlResult && mlResult.length > 10) {
+      console.log(`[ai.rewriteText] ML service (${style}) success`);
+      return mlResult;
+    }
+  } catch (err) {
+    console.warn('[ai.rewriteText] ML service error:', err.message);
+  }
+
+  // Fallback to Gemini/NLP Cloud API
   const styleMap = {
     positive: 'Rewrite the following text to sound more positive and encouraging.',
     concise: 'Rewrite the following text to be concise and clearer in 2-3 sentences.',
@@ -309,6 +337,7 @@ async function rewriteText(text, style = 'concise') {
   const prompt = `${styleMap[style] || styleMap.concise}\n\nText:\n${text}\n\nRewrite:`;
   const ai = await generateTextWithModel(prompt, 160);
   if (ai) return ai;
+
   // Local fallback heuristics
   if (style === 'concise') {
     const sentences = text.split(/(?<=[.?!])\s+/);
@@ -318,7 +347,7 @@ async function rewriteText(text, style = 'concise') {
     return text.replace(/\b(I am|I'm|I feel)\b/gi, 'I appreciate').slice(0, 800);
   }
   if (style === 'reflective') {
-    return `Reflecting: ${text.slice(0,600)}`;
+    return `Reflecting: ${text.slice(0, 600)}`;
   }
   return text;
 }
@@ -332,10 +361,10 @@ async function suggestTitle(text) {
   const ai = await generateTextWithModel(prompt, 80);
   if (ai) {
     const lines = ai.split(/\r?\n/).map(l => l.replace(/^\d+[\).\s-]*/, '').trim()).filter(Boolean);
-    if (lines.length) return lines.slice(0,3);
+    if (lines.length) return lines.slice(0, 3);
   }
   // fallback: use first clause
-  const candidate = text.split(/[.?!]/)[0].slice(0,50).trim();
+  const candidate = text.split(/[.?!]/)[0].slice(0, 50).trim();
   return [candidate || 'Untitled'];
 }
 
@@ -351,11 +380,11 @@ async function generateTags(text, limit = 8) {
     return Array.from(new Set(parts)).slice(0, limit);
   }
   // local fallback keyword extraction
-  const stop = new Set(['the','a','and','i','to','it','was','is','in','of','my','on','for','with','that','this','but','at','you']);
+  const stop = new Set(['the', 'a', 'and', 'i', 'to', 'it', 'was', 'is', 'in', 'of', 'my', 'on', 'for', 'with', 'that', 'this', 'but', 'at', 'you']);
   const words = (text || '').toLowerCase().match(/\b[a-z]{3,}\b/g) || [];
   const freq = {};
   for (const w of words) if (!stop.has(w)) freq[w] = (freq[w] || 0) + 1;
-  const tags = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,limit).map(x=>x[0]);
+  const tags = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, limit).map(x => x[0]);
   return tags;
 }
 
@@ -375,7 +404,7 @@ async function adviceForMood(mood_label, mood_score = 0.5, contextText = '') {
   if (INSIGHT_MODEL) {
     const prompt = `You are a short empathetic assistant. Provide 3 short (1-2 line) actionable suggestions for a user with mood "${mood_label}" (score ${Number(mood_score).toFixed ? Number(mood_score).toFixed(2) : mood_score}). Context: ${contextText}\n\nSuggestions:`;
     const ai = await generateTextWithModel(prompt, 140);
-    if (ai) return ai.split(/\r?\n/).filter(Boolean).slice(0,3).join(' ');
+    if (ai) return ai.split(/\r?\n/).filter(Boolean).slice(0, 3).join(' ');
   }
   return (base[mood_label] || base['neutral']).join(' ');
 }
@@ -394,17 +423,17 @@ async function detectHabits(userId, lookbackDays = 90) {
     let d = r.date;
     if (!d) continue;
     // ensure YYYY-MM-DD string
-    const dateStr = (typeof d === 'string') ? d.slice(0,10) : (d.toISOString().slice(0,10));
+    const dateStr = (typeof d === 'string') ? d.slice(0, 10) : (d.toISOString().slice(0, 10));
     const wd = new Date(dateStr).getDay();
-    weekdayStats[wd] = weekdayStats[wd] || { count:0, lowMoodCount:0, sumScore:0 };
+    weekdayStats[wd] = weekdayStats[wd] || { count: 0, lowMoodCount: 0, sumScore: 0 };
     weekdayStats[wd].count++;
     if (r.mood_score !== null && r.mood_score !== undefined && Number(r.mood_score) < 0.45) weekdayStats[wd].lowMoodCount++;
     weekdayStats[wd].sumScore += (r.mood_score !== null ? Number(r.mood_score) : 0.5);
   }
 
   const habits = [];
-  const names = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  for (let i=0;i<7;i++) {
+  const names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  for (let i = 0; i < 7; i++) {
     const s = weekdayStats[i];
     if (!s || s.count < 5) continue;
     const lowRatio = s.lowMoodCount / s.count;
@@ -487,6 +516,75 @@ async function generateWelcomeGreeting(userName, isNewUser = false, userId = nul
   }
 }
 
+//
+// --- AI Mood Detection (TensorFlow ML) ---
+//
+
+/**
+ * detectMoodFromText - uses local TensorFlow ML model for mood detection
+ * @param {string} text - Journal entry text
+ * @returns {Promise<Object>} Detected mood with label, score, confidence, emoji
+ */
+async function detectMoodFromText(text) {
+  if (!text || text.trim().length < 10) {
+    return { mood_label: 'neutral', mood_score: 0.5, confidence: 0.3, emoji: '😐', description: 'Feeling balanced and stable' };
+  }
+
+  try {
+    const mlMoodService = require('./mlMoodService');
+    const result = await mlMoodService.detectMood(text);
+    console.log('[ai.detectMoodFromText] ML mood detection success:', result.mood_label);
+    return result;
+  } catch (err) {
+    console.warn('[ai.detectMoodFromText] ML service error:', err.message);
+    // Fallback to basic sentiment
+    return { mood_label: 'neutral', mood_score: 0.5, confidence: 0.3, emoji: '😐', description: 'Feeling balanced and stable' };
+  }
+}
+
+//
+// --- AI Writing Prompts (TensorFlow ML) ---
+//
+
+/**
+ * generateWritingPrompts - generates personalized writing prompts for user
+ * @param {number} userId - User ID
+ * @param {Object} options - Options { category, count, refresh }
+ * @returns {Promise<Object>} Generated prompts with context
+ */
+async function generateWritingPrompts(userId, options = {}) {
+  try {
+    const mlPromptsService = require('./mlPromptsService');
+    const result = await mlPromptsService.generatePrompts(userId, options);
+    console.log(`[ai.generateWritingPrompts] Generated ${result.prompts.length} prompts for user ${userId}`);
+    return result;
+  } catch (err) {
+    console.warn('[ai.generateWritingPrompts] ML service error:', err.message);
+    // Return fallback prompts
+    return {
+      prompts: [
+        { text: "What's on your mind today?", category: 'reflection', id: 'fallback_1' },
+        { text: "What are you grateful for right now?", category: 'gratitude', id: 'fallback_2' },
+        { text: "How are you feeling at this moment?", category: 'emotions', id: 'fallback_3' }
+      ],
+      generated_at: new Date().toISOString(),
+      fallback: true
+    };
+  }
+}
+
+/**
+ * getPromptCategories - returns available prompt categories
+ */
+function getPromptCategories() {
+  try {
+    const mlPromptsService = require('./mlPromptsService');
+    return mlPromptsService.getCategories();
+  } catch (err) {
+    return ['gratitude', 'reflection', 'goals', 'emotions', 'relationships', 'creativity', 'mindfulness', 'challenges'];
+  }
+}
+
 module.exports = {
   analyzeMoodForText,
   generateMoodInsights,
@@ -496,5 +594,8 @@ module.exports = {
   generateTags,
   adviceForMood,
   detectHabits,
-  generateWelcomeGreeting
+  generateWelcomeGreeting,
+  detectMoodFromText,
+  generateWritingPrompts,
+  getPromptCategories
 };

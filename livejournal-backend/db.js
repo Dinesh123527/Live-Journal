@@ -310,6 +310,34 @@ async function init() {
         INDEX (life_event),
         INDEX (is_opened)
       );
+
+      -- Cache user-specific writing prompts (for AI prompts feature)
+      CREATE TABLE IF NOT EXISTS writing_prompts_cache (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        prompts JSON NOT NULL,
+        prompt_category VARCHAR(50) NULL,
+        generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY uq_user_prompts (user_id),
+        INDEX (user_id),
+        INDEX (expires_at)
+      );
+
+      -- Store discovered themes per user for personalization
+      CREATE TABLE IF NOT EXISTS user_themes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        theme VARCHAR(100) NOT NULL,
+        relevance_score FLOAT DEFAULT 0.5,
+        occurrences INT DEFAULT 1,
+        last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY uq_user_theme (user_id, theme),
+        INDEX (user_id),
+        INDEX (relevance_score)
+      );
     `;
 
     await tmpConn.query(createTables);
