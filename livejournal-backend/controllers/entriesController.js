@@ -1,6 +1,7 @@
 require('dotenv').config();
 const db = require('../db');
 const { updateUserStreak } = require('../utils/streakCalculator');
+const { moodToCategory } = require('./gardenController');
 let analyzeMoodForText = null;
 
 // Try to load optional AI util (safe if missing)
@@ -8,7 +9,7 @@ try {
   const ai = require('../utils/ai');
   if (typeof ai.analyzeMoodForText === 'function') analyzeMoodForText = ai.analyzeMoodForText;
 } catch (e) {
-    console.error('AI mood analysis module not found, skipping mood analysis.');
+  console.error('AI mood analysis module not found, skipping mood analysis.');
 }
 
 const sanitize = (v) => (v === undefined ? null : v);
@@ -183,10 +184,85 @@ async function createEntry(req, res) {
       // Don't fail the request if streak update fails
     });
 
+    // Auto-plant a flower in the garden based on entry mood (non-blocking)
+    if (mood_label) {
+      plantFlowerForEntry(userId, insertedId, mood_label).catch(err => {
+        console.error('Failed to plant garden flower:', err);
+        // Don't fail the request if garden planting fails
+      });
+    }
+
     res.status(201).json({ entry: rows[0], analysis });
   } catch (err) {
     console.error('createEntry error', err);
     res.status(500).json({ error: 'Server error' });
+  }
+}
+
+/**
+ * Helper: Plant a flower in the user's garden when they create an entry
+ */
+async function plantFlowerForEntry(userId, entryId, moodLabel) {
+  try {
+    // Get or create garden
+    const [gardens] = await db.query(`SELECT * FROM user_gardens WHERE user_id = ?`, [userId]);
+    let garden;
+
+    if (gardens.length === 0) {
+      await db.query(`INSERT INTO user_gardens (user_id) VALUES (?)`, [userId]);
+      const [newGarden] = await db.query(`SELECT * FROM user_gardens WHERE user_id = ?`, [userId]);
+      garden = newGarden[0];
+    } else {
+      garden = gardens[0];
+    }
+
+    // Determine plant category from mood
+    const category = moodToCategory(moodLabel);
+
+    // Get available plants for this category (weighted by rarity)
+    const [availablePlants] = await db.query(
+      `SELECT * FROM garden_plant_types WHERE category = ?`,
+      [category]
+    );
+
+    if (availablePlants.length === 0) {
+      console.log(`No plants found for category: ${category}`);
+      return;
+    }
+
+    // Weighted random selection based on rarity
+    const weights = { common: 60, uncommon: 25, rare: 10, legendary: 5 };
+    const weightedPlants = [];
+    availablePlants.forEach(plant => {
+      const weight = weights[plant.rarity] || 10;
+      for (let i = 0; i < weight; i++) {
+        weightedPlants.push(plant);
+      }
+    });
+
+    const selectedPlant = weightedPlants[Math.floor(Math.random() * weightedPlants.length)];
+
+    // Calculate grid position
+    const posX = garden.total_plants % 10;
+    const posY = Math.floor(garden.total_plants / 10);
+
+    // Insert the plant
+    await db.query(
+      `INSERT INTO garden_plants (user_id, plant_type_id, entry_id, position_x, position_y) VALUES (?, ?, ?, ?, ?)`,
+      [userId, selectedPlant.id, entryId, posX, posY]
+    );
+
+    // Update garden stats
+    const newXp = garden.total_xp + selectedPlant.xp_value;
+    await db.query(
+      `UPDATE user_gardens SET total_xp = ?, total_plants = total_plants + 1, updated_at = NOW() WHERE user_id = ?`,
+      [newXp, userId]
+    );
+
+    console.log(`🌱 Planted ${selectedPlant.name} (${selectedPlant.emoji}) for user ${userId}`);
+  } catch (err) {
+    console.error('plantFlowerForEntry error:', err);
+    throw err;
   }
 }
 

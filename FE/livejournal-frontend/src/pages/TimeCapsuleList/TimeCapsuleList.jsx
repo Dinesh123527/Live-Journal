@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar.jsx';
 import SealedCapsuleModal from '../../components/SealedCapsuleModal/SealedCapsuleModal.jsx';
+import UnlockedCapsuleModal from '../../components/UnlockedCapsuleModal/UnlockedCapsuleModal.jsx';
 import axiosInstance from '../../utils/axiosInstance';
 import './TimeCapsuleList.scss';
 
@@ -20,9 +21,12 @@ const TimeCapsuleList = () => {
     const [error, setError] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
 
-    // Modal state
+    // Modal state for sealed capsules
     const [showSealedModal, setShowSealedModal] = useState(false);
     const [selectedCapsule, setSelectedCapsule] = useState(null);
+
+    // Modal state for unlocked capsules
+    const [showUnlockedModal, setShowUnlockedModal] = useState(false);
 
     // Fetch user info
     useEffect(() => {
@@ -50,14 +54,45 @@ const TimeCapsuleList = () => {
     }, []);
 
     // Handle capsule click
-    const handleCapsuleClick = (capsule) => {
+    const handleCapsuleClick = async (capsule) => {
         if (capsule.is_locked) {
             // Show sealed modal for locked capsules
             setSelectedCapsule(capsule);
             setShowSealedModal(true);
         } else {
-            // Navigate to view unlocked capsule
-            navigate(`/dashboard/time-capsule/${capsule.id}`);
+            // Fetch full capsule details (this also records opened_at on first view)
+            try {
+                const response = await axiosInstance.get(`/time-capsule/${capsule.id}`);
+                const fullCapsule = response.data.capsule;
+                setSelectedCapsule(fullCapsule);
+                setShowUnlockedModal(true);
+
+                // Update the local list with opened_at if it was just set
+                if (!capsule.opened_at && fullCapsule.opened_at) {
+                    setCapsules(prev => prev.map(c =>
+                        c.id === capsule.id ? { ...c, opened_at: fullCapsule.opened_at } : c
+                    ));
+                }
+            } catch (err) {
+                console.error('Error fetching capsule details:', err);
+                // Fallback to showing with existing data
+                setSelectedCapsule(capsule);
+                setShowUnlockedModal(true);
+            }
+        }
+    };
+
+    // Handle auto-delete after reading
+    const handleAutoDelete = async (capsuleId) => {
+        try {
+            await axiosInstance.delete(`/time-capsule/${capsuleId}`);
+            // Remove from local state
+            setCapsules(prev => prev.filter(c => c.id !== capsuleId));
+            // Close modal
+            setShowUnlockedModal(false);
+            setSelectedCapsule(null);
+        } catch (err) {
+            console.error('Error auto-deleting capsule:', err);
         }
     };
 
@@ -233,6 +268,17 @@ const TimeCapsuleList = () => {
                     setSelectedCapsule(null);
                 }}
                 capsule={selectedCapsule}
+            />
+
+            {/* Unlocked Capsule Modal */}
+            <UnlockedCapsuleModal
+                isOpen={showUnlockedModal}
+                onClose={() => {
+                    setShowUnlockedModal(false);
+                    setSelectedCapsule(null);
+                }}
+                capsule={selectedCapsule}
+                onDelete={handleAutoDelete}
             />
         </div>
     );

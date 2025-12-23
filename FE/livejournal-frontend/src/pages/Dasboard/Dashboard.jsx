@@ -4,10 +4,12 @@ import {
   Bell,
   BookOpen,
   Calendar,
+  Dices,
   Edit3,
   FileText,
   Flame,
   Globe,
+  Leaf,
   Lightbulb,
   Lock,
   Mail,
@@ -474,6 +476,30 @@ const Dashboard = () => {
           >
             <Package size={20} />
             <span>Time Capsule</span>
+          </button>
+          <button
+            className="action-btn memory-roulette-btn"
+            onClick={() => navigate('/dashboard/memory-roulette')}
+            title="Rediscover past memories"
+          >
+            <Dices size={20} />
+            <span>Memory Roulette</span>
+          </button>
+          <button
+            className="action-btn reflection-cards-btn"
+            onClick={() => navigate('/dashboard/reflection-cards')}
+            title="View your journaling stats"
+          >
+            <Sparkles size={20} />
+            <span>Reflection Cards</span>
+          </button>
+          <button
+            className="action-btn gratitude-garden-btn"
+            onClick={() => navigate('/dashboard/gratitude-garden')}
+            title="Grow your gratitude garden"
+          >
+            <Leaf size={20} />
+            <span>Gratitude Garden</span>
           </button>
         </div>
 

@@ -338,6 +338,100 @@ async function init() {
         INDEX (user_id),
         INDEX (relevance_score)
       );
+
+      -- Memory Roulette: reactions when users revisit entries
+      CREATE TABLE IF NOT EXISTS memory_reactions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        entry_id INT NOT NULL,
+        reaction_type ENUM('remember', 'grown', 'relevant') NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (entry_id) REFERENCES entries(id) ON DELETE CASCADE,
+        UNIQUE KEY uq_user_entry_reaction (user_id, entry_id),
+        INDEX (user_id),
+        INDEX (entry_id),
+        INDEX (reaction_type)
+      );
+
+      -- Memory Roulette: achievements tracking
+      CREATE TABLE IF NOT EXISTS roulette_achievements (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        achievement_type VARCHAR(50) NOT NULL,
+        unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        metadata JSON NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY uq_user_achievement (user_id, achievement_type),
+        INDEX (user_id),
+        INDEX (achievement_type)
+      );
+
+      -- Gratitude Garden: plant type definitions
+      CREATE TABLE IF NOT EXISTS garden_plant_types (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(50) NOT NULL,
+        emoji VARCHAR(20) NOT NULL,
+        category ENUM('happy', 'sad', 'calm', 'excited', 'grateful', 'neutral') NOT NULL,
+        rarity ENUM('common', 'uncommon', 'rare', 'legendary') DEFAULT 'common',
+        description TEXT NULL,
+        grow_time_hours INT DEFAULT 24,
+        xp_value INT DEFAULT 10,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Gratitude Garden: user garden metadata
+      CREATE TABLE IF NOT EXISTS user_gardens (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        level INT DEFAULT 1,
+        total_xp INT DEFAULT 0,
+        total_plants INT DEFAULT 0,
+        current_streak INT DEFAULT 0,
+        longest_streak INT DEFAULT 0,
+        last_watered_at TIMESTAMP NULL,
+        garden_theme ENUM('spring', 'summer', 'autumn', 'winter') DEFAULT 'spring',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY uq_user_garden (user_id),
+        INDEX (user_id),
+        INDEX (level)
+      );
+
+      -- Gratitude Garden: user's planted flowers
+      CREATE TABLE IF NOT EXISTS garden_plants (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        plant_type_id INT NOT NULL,
+        entry_id INT NULL,
+        growth_stage ENUM('seed', 'sprout', 'growing', 'bloomed') DEFAULT 'seed',
+        health INT DEFAULT 100,
+        position_x INT DEFAULT 0,
+        position_y INT DEFAULT 0,
+        planted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        bloomed_at TIMESTAMP NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (plant_type_id) REFERENCES garden_plant_types(id) ON DELETE CASCADE,
+        FOREIGN KEY (entry_id) REFERENCES entries(id) ON DELETE SET NULL,
+        INDEX (user_id),
+        INDEX (plant_type_id),
+        INDEX (growth_stage),
+        INDEX (health)
+      );
+
+      -- Gratitude Garden: achievements
+      CREATE TABLE IF NOT EXISTS garden_achievements (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        achievement_type VARCHAR(50) NOT NULL,
+        unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        metadata JSON NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY uq_user_garden_achievement (user_id, achievement_type),
+        INDEX (user_id),
+        INDEX (achievement_type)
+      );
     `;
 
     await tmpConn.query(createTables);
@@ -375,6 +469,91 @@ async function init() {
       }
     } catch (migrationErr) {
       console.log("Reset token migration note:", migrationErr.message);
+    }
+
+    // Seed Gratitude Garden plant types
+    try {
+      const [plantTypes] = await tmpConn.query(`SELECT COUNT(*) as count FROM garden_plant_types`);
+
+      if (plantTypes[0].count === 0) {
+        const plantTypesData = `
+          INSERT INTO garden_plant_types (name, emoji, category, rarity, description, grow_time_hours, xp_value) VALUES
+          -- Happy plants
+          ('Sunflower', '🌻', 'happy', 'common', 'A bright and cheerful flower that follows the sun', 24, 10),
+          ('Rose', '🌹', 'happy', 'uncommon', 'A classic symbol of love and joy', 24, 25),
+          ('Cherry Blossom', '🌸', 'happy', 'rare', 'Delicate pink petals that celebrate happiness', 24, 50),
+          ('Hibiscus', '🌺', 'happy', 'legendary', 'A tropical treasure of pure joy', 24, 100),
+          
+          -- Sad plants (calming)
+          ('Fern', '🌿', 'sad', 'common', 'A gentle fern that brings peace', 24, 10),
+          ('Lavender', '💜', 'sad', 'uncommon', 'Soothing purple blooms for comfort', 24, 25),
+          ('Iris', '🪻', 'sad', 'rare', 'A graceful flower representing hope', 24, 50),
+          ('Willow', '🍃', 'sad', 'legendary', 'A wise tree that understands sorrow', 24, 100),
+          
+          -- Calm plants
+          ('Clover', '🍀', 'calm', 'common', 'A lucky charm for peaceful days', 24, 10),
+          ('Lotus', '🪷', 'calm', 'uncommon', 'Symbol of purity and tranquility', 24, 25),
+          ('Bamboo', '🎋', 'calm', 'rare', 'Represents strength in flexibility', 24, 50),
+          ('Bonsai', '🌳', 'calm', 'legendary', 'Ancient wisdom in miniature form', 24, 100),
+          
+          -- Excited plants
+          ('Tulip', '🌷', 'excited', 'common', 'Vibrant colors bursting with energy', 24, 10),
+          ('Daisy', '🌼', 'excited', 'uncommon', 'Simple joy in petal form', 24, 25),
+          ('Wheat', '🌾', 'excited', 'rare', 'Abundance and prosperity', 24, 50),
+          ('Pine', '🎄', 'excited', 'legendary', 'Evergreen celebration of life', 24, 100),
+          
+          -- Grateful plants (special golden)
+          ('Golden Sprout', '✨', 'grateful', 'common', 'A magical sprout of gratitude', 24, 15),
+          ('Star Flower', '🌟', 'grateful', 'uncommon', 'Radiates thankfulness', 24, 30),
+          ('Moon Blossom', '💫', 'grateful', 'rare', 'Blooms with cosmic appreciation', 24, 60),
+          ('Crown Lily', '👑', 'grateful', 'legendary', 'The rarest flower of deep gratitude', 24, 120),
+          
+          -- Neutral plants
+          ('Grass', '🌱', 'neutral', 'common', 'Simple and steady growth', 24, 10),
+          ('Cactus', '🌵', 'neutral', 'uncommon', 'Resilient through all conditions', 24, 25),
+          ('Succulent', '🪴', 'neutral', 'rare', 'Thrives with minimal care', 24, 50),
+          ('Evergreen', '🌲', 'neutral', 'legendary', 'Eternal and unchanging', 24, 100)
+        `;
+        await tmpConn.query(plantTypesData);
+        console.log("✅ Garden plant types seeded (24 plants)");
+      } else {
+        console.log("✅ Garden plant types already exist");
+      }
+    } catch (migrationErr) {
+      console.log("Garden plant types seeding note:", migrationErr.message);
+    }
+
+    // Add opened_at column to entries table for time capsules
+    try {
+      const [columns] = await tmpConn.query(`
+        SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'entries' AND COLUMN_NAME = 'opened_at'
+      `, [DB_NAME]);
+
+      if (columns.length === 0) {
+        await tmpConn.query(`ALTER TABLE entries ADD COLUMN opened_at DATETIME NULL`);
+        console.log("✅ Entries table opened_at column added");
+      } else {
+        console.log("✅ Entries table opened_at column already exists");
+      }
+    } catch (migrationErr) {
+      console.log("Opened_at migration note:", migrationErr.message);
+    }
+
+    // Backfill opened_at for already-unlocked time capsules
+    try {
+      const [result] = await tmpConn.query(`
+        UPDATE entries 
+        SET opened_at = unlock_at 
+        WHERE is_time_capsule = 1 
+          AND unlock_at <= NOW() 
+          AND opened_at IS NULL
+      `);
+      if (result.affectedRows > 0) {
+        console.log(`✅ Backfilled opened_at for ${result.affectedRows} already-unlocked time capsules`);
+      }
+    } catch (migrationErr) {
+      console.log("Opened_at backfill note:", migrationErr.message);
     }
 
     await tmpConn.end();

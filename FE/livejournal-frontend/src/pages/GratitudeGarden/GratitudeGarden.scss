@@ -1,0 +1,719 @@
+.gratitude-garden-page {
+    min-height: 100vh;
+    background: var(--dashboard-bg-gradient);
+    padding-top: 4rem;
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        gap: 1rem;
+        color: var(--text-secondary);
+
+        .loading-icon {
+            color: #22c55e;
+        }
+    }
+
+    .garden-content {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    // Header
+    .garden-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                color: #22c55e;
+                border-color: #22c55e;
+            }
+        }
+
+        .header-info {
+            flex: 1;
+
+            h1 {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                font-size: 1.75rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin-bottom: 0.25rem;
+
+                .header-icon {
+                    color: #22c55e;
+                }
+            }
+
+            p {
+                color: var(--text-secondary);
+                font-size: 0.95rem;
+            }
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1rem;
+
+            .stat-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                background: var(--card-bg);
+                border-radius: 10px;
+                border: 1px solid var(--card-border);
+                font-weight: 600;
+                font-size: 0.9rem;
+
+                &.level {
+                    color: #f59e0b;
+                    background: rgba(245, 158, 11, 0.1);
+                    border-color: rgba(245, 158, 11, 0.2);
+                }
+
+                &.streak {
+                    color: #ef4444;
+                    background: rgba(239, 68, 68, 0.1);
+                    border-color: rgba(239, 68, 68, 0.2);
+                }
+            }
+        }
+    }
+
+    // XP Bar
+    .xp-bar-container {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+
+        .xp-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+
+            .xp-label {
+                font-size: 0.875rem;
+                color: var(--text-secondary);
+            }
+
+            .xp-value {
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: #22c55e;
+            }
+        }
+
+        .xp-bar {
+            height: 8px;
+            background: var(--card-hover);
+            border-radius: 4px;
+            overflow: hidden;
+
+            .xp-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #22c55e, #16a34a);
+                border-radius: 4px;
+                transition: width 0.5s ease;
+            }
+        }
+    }
+
+    // Garden Container
+    .garden-container {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+
+        &.watering {
+            .garden-grid .plant-item {
+                animation: waterBounce 0.5s ease infinite alternate;
+            }
+        }
+
+        .garden-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+
+            .plant-count {
+                font-size: 1rem;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .share-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                background: transparent;
+                border: 1px solid var(--card-border);
+                border-radius: 8px;
+                color: var(--text-secondary);
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    background: rgba(34, 197, 94, 0.1);
+                    border-color: #22c55e;
+                    color: #22c55e;
+                }
+            }
+        }
+
+        .garden-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+            gap: 0.5rem;
+            min-height: 200px;
+            padding: 1rem;
+            background: linear-gradient(180deg,
+                    rgba(34, 197, 94, 0.05) 0%,
+                    rgba(34, 197, 94, 0.1) 100%);
+            border-radius: 12px;
+            border: 1px dashed rgba(34, 197, 94, 0.3);
+
+            .empty-garden {
+                grid-column: 1 / -1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+                padding: 3rem;
+                color: var(--text-secondary);
+                text-align: center;
+
+                svg {
+                    opacity: 0.5;
+                }
+
+                h3 {
+                    font-size: 1.25rem;
+                    color: var(--text-primary);
+                }
+
+                .start-btn {
+                    padding: 0.75rem 1.5rem;
+                    background: linear-gradient(135deg, #22c55e, #16a34a);
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+
+                    &:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+                    }
+                }
+            }
+
+            .plant-item {
+                aspect-ratio: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: var(--card-bg);
+                border-radius: 10px;
+                border: 2px solid var(--card-border);
+                cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+
+                &:hover {
+                    transform: scale(1.1);
+                    border-color: var(--rarity-color);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                    z-index: 10;
+                }
+
+                .plant-emoji {
+                    font-size: 1.5rem;
+                }
+
+                .rarity-indicator {
+                    position: absolute;
+                    bottom: 2px;
+                    right: 2px;
+                    width: 8px;
+                    height: 8px;
+                    background: var(--rarity-color);
+                    border-radius: 50%;
+                    box-shadow: 0 0 6px var(--rarity-color);
+                }
+
+                &.uncommon {
+                    border-color: rgba(34, 197, 94, 0.3);
+                }
+
+                &.rare {
+                    border-color: rgba(59, 130, 246, 0.3);
+                    background: linear-gradient(135deg, var(--card-bg), rgba(59, 130, 246, 0.05));
+                }
+
+                &.legendary {
+                    border-color: rgba(245, 158, 11, 0.5);
+                    background: linear-gradient(135deg, var(--card-bg), rgba(245, 158, 11, 0.1));
+                    animation: legendaryGlow 2s ease infinite;
+                }
+            }
+        }
+
+        .watering-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+
+            .water-drops {
+                position: relative;
+                width: 100%;
+                height: 100%;
+
+                .drop {
+                    position: absolute;
+                    font-size: 1.5rem;
+                }
+            }
+        }
+    }
+
+    // Water Section
+    .water-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+
+        .water-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+
+            &:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+            }
+
+            &:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
+
+            &.needs-water {
+                animation: pulseWater 1.5s ease infinite;
+            }
+
+            &.watering svg {
+                animation: waterDrop 0.5s ease infinite;
+            }
+
+            .animating {
+                animation: waterDrop 0.5s ease infinite;
+            }
+        }
+
+        .water-reminder {
+            font-size: 0.875rem;
+            color: #3b82f6;
+            text-align: center;
+        }
+    }
+
+    // Stats Section
+    .stats-section {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+
+            @media (max-width: 600px) {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-card {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.25rem;
+                padding: 1rem;
+                background: color-mix(in srgb, var(--stat-color) 10%, transparent);
+                border: 1px solid color-mix(in srgb, var(--stat-color) 20%, transparent);
+                border-radius: 12px;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    transform: translateY(-2px);
+                    border-color: var(--stat-color);
+                }
+
+                .stat-count {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: var(--stat-color);
+                }
+
+                .stat-label {
+                    font-size: 0.8rem;
+                    color: var(--text-secondary);
+                }
+            }
+        }
+    }
+
+    // Achievements Section
+    .achievements-section {
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        padding: 1.5rem;
+
+        h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+
+            svg {
+                color: #fbbf24;
+            }
+
+            .achievement-count {
+                margin-left: auto;
+                font-size: 0.875rem;
+                color: var(--text-secondary);
+                font-weight: 500;
+            }
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+
+            .achievement-badge {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 1rem;
+                border-radius: 12px;
+                text-align: center;
+                transition: all 0.3s ease;
+
+                &.unlocked {
+                    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+                    border: 1px solid rgba(251, 191, 36, 0.3);
+
+                    .badge-icon {
+                        font-size: 2rem;
+                    }
+
+                    .badge-name {
+                        color: var(--text-primary);
+                        font-weight: 600;
+                        font-size: 0.875rem;
+                    }
+                }
+
+                &.locked {
+                    background: var(--card-hover);
+                    border: 1px solid var(--card-border);
+                    opacity: 0.5;
+
+                    .badge-icon {
+                        font-size: 2rem;
+                        filter: grayscale(1);
+                    }
+
+                    .badge-name {
+                        color: var(--text-secondary);
+                        font-size: 0.875rem;
+                    }
+
+                    .badge-hint {
+                        font-size: 0.75rem;
+                        color: var(--text-muted);
+                    }
+                }
+            }
+        }
+    }
+
+    // Achievement Toast
+    .achievement-toast {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(251, 191, 36, 0.4);
+        z-index: 1000;
+
+        .toast-icon {
+            font-size: 2rem;
+        }
+
+        .toast-content {
+            display: flex;
+            flex-direction: column;
+
+            .toast-title {
+                font-size: 0.75rem;
+                opacity: 0.9;
+            }
+
+            .toast-name {
+                font-size: 1rem;
+                font-weight: 700;
+            }
+        }
+    }
+
+    // Plant Modal
+    .plant-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+
+        .plant-modal {
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            max-width: 320px;
+            width: 100%;
+
+            .plant-modal-header {
+                padding: 2rem;
+                background: linear-gradient(135deg,
+                        color-mix(in srgb, var(--rarity-color) 20%, var(--card-bg)),
+                        color-mix(in srgb, var(--rarity-color) 10%, var(--card-bg)));
+                display: flex;
+                justify-content: center;
+
+                .plant-emoji-large {
+                    font-size: 4rem;
+                }
+            }
+
+            .plant-modal-body {
+                padding: 1.5rem;
+                text-align: center;
+
+                h3 {
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                    color: var(--text-primary);
+                    margin-bottom: 0.5rem;
+                }
+
+                .rarity-badge {
+                    display: inline-block;
+                    padding: 0.25rem 0.75rem;
+                    border-radius: 20px;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    text-transform: capitalize;
+                    margin-bottom: 1rem;
+
+                    &.common {
+                        background: rgba(156, 163, 175, 0.2);
+                        color: #9ca3af;
+                    }
+
+                    &.uncommon {
+                        background: rgba(34, 197, 94, 0.2);
+                        color: #22c55e;
+                    }
+
+                    &.rare {
+                        background: rgba(59, 130, 246, 0.2);
+                        color: #3b82f6;
+                    }
+
+                    &.legendary {
+                        background: rgba(245, 158, 11, 0.2);
+                        color: #f59e0b;
+                    }
+                }
+
+                .plant-description {
+                    font-size: 0.9rem;
+                    color: var(--text-secondary);
+                    line-height: 1.5;
+                    margin-bottom: 1rem;
+                }
+
+                .plant-meta {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 0.8rem;
+                    color: var(--text-muted);
+                    border-top: 1px solid var(--card-border);
+                    padding-top: 1rem;
+                }
+            }
+
+            .close-modal-btn {
+                width: 100%;
+                padding: 1rem;
+                background: transparent;
+                border: none;
+                border-top: 1px solid var(--card-border);
+                color: var(--text-primary);
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    background: var(--card-hover);
+                }
+            }
+        }
+    }
+}
+
+// Animations
+@keyframes waterBounce {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes legendaryGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(245, 158, 11, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+    }
+}
+
+@keyframes pulseWater {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+@keyframes waterDrop {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(3px);
+    }
+}
+
+@media (max-width: 768px) {
+    .gratitude-garden-page {
+        .garden-header {
+            .header-info h1 {
+                font-size: 1.35rem;
+            }
+
+            .header-stats {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .garden-container .garden-grid {
+            grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+
+            .plant-item .plant-emoji {
+                font-size: 1.25rem;
+            }
+        }
+
+        .achievements-section .achievements-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+}

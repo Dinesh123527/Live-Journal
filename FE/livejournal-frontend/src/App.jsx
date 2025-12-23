@@ -10,6 +10,7 @@ import EntriesList from './pages/EntriesList/EntriesList.jsx';
 import EntryDetail from './pages/EntryDetail/EntryDetail.jsx';
 import EntryEditor from './pages/EntryEditor/EntryEditor.jsx';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword.jsx';
+import GratitudeGarden from './pages/GratitudeGarden/GratitudeGarden.jsx';
 import Highlights from './pages/Highlights/Highlights.jsx';
 import Landing from './pages/Landing/Landing.jsx';
 import Learning from './pages/Learning/Learning.jsx';
@@ -18,7 +19,9 @@ import LettersList from './pages/LettersList/LettersList.jsx';
 import LifeChapters from './pages/LifeChapters/LifeChapters.jsx';
 import Login from './pages/Login/Login.jsx';
 import Logout from './pages/Logout/Logout.jsx';
+import MemoryRoulette from './pages/MemoryRoulette/MemoryRoulette.jsx';
 import Privacy from './pages/Privacy/Privacy.jsx';
+import ReflectionCards from './pages/ReflectionCards/ReflectionCards.jsx';
 import ResetPassword from './pages/ResetPassword/ResetPassword.jsx';
 import Search from './pages/Search/Search.jsx';
 import Signup from './pages/Signup/Signup.jsx';
@@ -177,6 +180,30 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <PageTransition><LettersList /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/memory-roulette"
+          element={
+            <ProtectedRoute>
+              <PageTransition><MemoryRoulette /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/reflection-cards"
+          element={
+            <ProtectedRoute>
+              <PageTransition><ReflectionCards /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/gratitude-garden"
+          element={
+            <ProtectedRoute>
+              <PageTransition><GratitudeGarden /></PageTransition>
             </ProtectedRoute>
           }
         />

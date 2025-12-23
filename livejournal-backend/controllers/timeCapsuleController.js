@@ -75,7 +75,7 @@ async function listTimeCapsules(req, res) {
         const offset = (Math.max(1, Number(page)) - 1) * Number(limit);
 
         const [rows] = await db.query(
-            `SELECT id, title, body, tags, is_private, unlock_at, created_at, updated_at,
+            `SELECT id, title, body, tags, is_private, unlock_at, opened_at, created_at, updated_at,
               CASE WHEN unlock_at <= NOW() THEN 0 ELSE 1 END as is_locked
        FROM entries 
        WHERE user_id = ? AND is_time_capsule = 1
@@ -128,7 +128,7 @@ async function getTimeCapsule(req, res) {
         const capsuleId = req.params.id;
 
         const [rows] = await db.query(
-            `SELECT id, title, body, tags, is_private, unlock_at, created_at, updated_at,
+            `SELECT id, title, body, tags, is_private, unlock_at, opened_at, created_at, updated_at,
               CASE WHEN unlock_at <= NOW() THEN 0 ELSE 1 END as is_locked
        FROM entries 
        WHERE id = ? AND user_id = ? AND is_time_capsule = 1`,
@@ -161,6 +161,15 @@ async function getTimeCapsule(req, res) {
                     created_at: capsule.created_at
                 }
             });
+        }
+
+        // Capsule is unlocked - record opened_at if first time opening
+        if (!capsule.opened_at) {
+            await db.query(
+                `UPDATE entries SET opened_at = NOW() WHERE id = ?`,
+                [capsuleId]
+            );
+            capsule.opened_at = new Date();
         }
 
         // Capsule is unlocked - return full content
